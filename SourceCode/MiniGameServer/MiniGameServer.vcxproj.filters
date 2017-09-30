@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="TinyXml">
+      <UniqueIdentifier>{943236a8-616b-4804-b773-ecfc23a3e542}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="niuniu">
+      <UniqueIdentifier>{eb90bb1d-ebb3-4e13-b08f-8b69004ec6cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Robot">
+      <UniqueIdentifier>{f1f64486-54d2-4aa6-8eab-35f858478254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Dial">
+      <UniqueIdentifier>{888362dd-a686-4e20-9de5-90723e90cb31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Car">
+      <UniqueIdentifier>{44bbb766-2541-4ce4-a2f7-346e008976f4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CommonFile\tinyxml\tinyxml2.h">
+      <Filter>TinyXml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CommonFile\tinyxml\XmlReader.h">
+      <Filter>TinyXml</Filter>
+    </ClInclude>
+    <ClInclude Include="FishServer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CommonFile\DBLogManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CommonFile\FishConfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CommonFile\FishServerConfig.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RoleManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="niuniu\NiuNiuManager.h">
+      <Filter>niuniu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CommonFile\RobotManager.h">
+      <Filter>Robot</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerControlItemSink.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="niuniu\oxrobot.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DialManager.h">
+      <Filter>Dial</Filter>
+    </ClInclude>
+    <ClInclude Include="CarManager.h">
+      <Filter>Car</Filter>
+    </ClInclude>
+    <ClInclude Include="niuniu\animalrobot.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="niuniu\carrobot.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MiniGameServer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CommonFile\tinyxml\tinyxml2.cpp">
+      <Filter>TinyXml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CommonFile\tinyxml\XmlReader.cpp">
+      <Filter>TinyXml</Filter>
+    </ClCompile>
+    <ClCompile Include="FishServer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CommonFile\DBLogManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CommonFile\FishConfig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CommonFile\FishServerConfig.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RoleManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="niuniu\NiuNiuManager.cpp">
+      <Filter>niuniu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CommonFile\RobotManager.cpp">
+      <Filter>Robot</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerControlItemSink.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="niuniu\oxrobot.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DialManager.cpp">
+      <Filter>Dial</Filter>
+    </ClCompile>
+    <ClCompile Include="CarManager.cpp">
+      <Filter>Car</Filter>
+    </ClCompile>
+    <ClCompile Include="niuniu\animalrobot.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="niuniu\carrobot.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

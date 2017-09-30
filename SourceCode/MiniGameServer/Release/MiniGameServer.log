@@ -1,0 +1,48 @@
+﻿生成启动时间为 2016/6/2 15:54:11。
+     1>项目“D:\BuyuSources\ServerCore\SourceCode\MiniGameServer\MiniGameServer.vcxproj”在节点 4 上(Rebuild 个目标)。
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ID:\BuyuSources\ServerCore\\SourceCode\Common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yc"stdafx.h" /Fp"Release\MiniGameServer.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt stdafx.cpp
+         stdafx.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ID:\BuyuSources\ServerCore\\SourceCode\Common /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm- /EHsc /MT /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Yu"stdafx.h" /Fp"Release\MiniGameServer.pch" /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\CommonFile\DBLogManager.cpp ..\CommonFile\FishConfig.cpp ..\CommonFile\FishServerConfig.cpp ..\CommonFile\RobotManager.cpp ..\CommonFile\tinyxml\tinyxml2.cpp ..\CommonFile\tinyxml\XmlReader.cpp CarManager.cpp DialManager.cpp FishServer.cpp MiniGameServer.cpp niuniu\animalrobot.cpp niuniu\carrobot.cpp niuniu\NiuNiuManager.cpp niuniu\oxrobot.cpp RoleManager.cpp ServerControlItemSink.cpp
+         DBLogManager.cpp
+         FishConfig.cpp
+         FishServerConfig.cpp
+         RobotManager.cpp
+         tinyxml2.cpp
+         XmlReader.cpp
+         CarManager.cpp
+         DialManager.cpp
+         FishServer.cpp
+         MiniGameServer.cpp
+         animalrobot.cpp
+         carrobot.cpp
+         NiuNiuManager.cpp
+         oxrobot.cpp
+         RoleManager.cpp
+         ServerControlItemSink.cpp
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\BuyuSources\ServerCore\Release\MiniGameServer.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:D:\BuyuSources\ServerCore\\Output\Release Common.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\BuyuSources\ServerCore\Release\MiniGameServer.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\BuyuSources\ServerCore\Release\MiniGameServer.lib" /MACHINE:X86 /SAFESEH Release\DBLogManager.obj
+         Release\FishConfig.obj
+         Release\FishServerConfig.obj
+         Release\RobotManager.obj
+         Release\tinyxml2.obj
+         Release\XmlReader.obj
+         Release\CarManager.obj
+         Release\DialManager.obj
+         Release\FishServer.obj
+         Release\MiniGameServer.obj
+         Release\animalrobot.obj
+         Release\carrobot.obj
+         Release\NiuNiuManager.obj
+         Release\oxrobot.obj
+         Release\RoleManager.obj
+         Release\ServerControlItemSink.obj
+         Release\stdafx.obj
+         正在生成代码
+         已完成代码的生成
+         MiniGameServer.vcxproj -> D:\BuyuSources\ServerCore\Release\MiniGameServer.exe
+     1>已完成生成项目“D:\BuyuSources\ServerCore\SourceCode\MiniGameServer\MiniGameServer.vcxproj”(Rebuild 个目标)的操作。
+
+生成成功。
+
+已用时间 00:00:34.46
