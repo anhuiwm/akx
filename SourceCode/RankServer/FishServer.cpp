@@ -62,7 +62,7 @@ bool FishServer::InitServer(bool IsNeedCreateRankXml)
 		return false;
 	}
 	m_RankNetworkID = pRankConfig->NetworkID;
-
+	g_ServerID = m_RankNetworkID;
 	if (!ConnectControl())
 	{
 		while (true)

@@ -65,14 +65,14 @@ bool FishDesk::HandleNetCmd(PlayerID id, NetCmd *pCmd)
 			SkillType skillID = SkillType::SKILL_MAX;
 			BYTE      VipSkill = 0;
 
-			LogInfoToFile("WmBullet.txt", " table=%d, seat=%d ,Angle=%d, Angle2=%d, Angle3=%d, launcherType:%d, byte:%d   LockFishID=%d", player->GetTableID(), player->GetSeatID(), pBullet->Angle, pBullet->Angle2, pBullet->Angle3, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), pBullet->LockFishID);
+			//LogInfoToFile("WmBullet.txt", " table=%d, seat=%d ,Angle=%d, Angle2=%d, Angle3=%d, launcherType:%d, byte:%d   LockFishID=%d", player->GetTableID(), player->GetSeatID(), pBullet->Angle, pBullet->Angle2, pBullet->Angle3, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), pBullet->LockFishID);
 
 			//if (pBullet->LockFishID != 0)//不能锁定 可以锁定怪物
 			if(player->IsUseLock())//使用锁定技能时候
 			{
 				if ( pBullet->LockFishID == 0)
 				{
-					LogInfoToFile("WmErrLog.txt", "skill no fish table=%d, seat=%d ,Angle=%d, Angle2=%d, Angle3=%d, launcherType:%d, byte:%d   LockFishID=%d", player->GetTableID(), player->GetSeatID(), pBullet->Angle, pBullet->Angle2, pBullet->Angle3, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), pBullet->LockFishID);
+					LogInfoToFile("WmBulletErr", "skill no fish table=%d, seat=%d ,Angle=%d, Angle2=%d, Angle3=%d, launcherType:%d, byte:%d   LockFishID=%d", player->GetTableID(), player->GetSeatID(), pBullet->Angle, pBullet->Angle2, pBullet->Angle3, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), pBullet->LockFishID);
 					return false;
 				}
 				else
@@ -122,7 +122,7 @@ bool FishDesk::HandleNetCmd(PlayerID id, NetCmd *pCmd)
 				//LogInfoToFile("WmLog.txt", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, byte:%d, dir:%f, %f, %f, pos:%f, %f, %f", player->GetTableID(), player->GetSeatID(), pBullet->BulletID, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z);
 				if (!ret)
 				{
-					LogInfoToFile("WmErrorLog.txt", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, byte:%d, dir:%f, %f, %f, pos:%f, %f, %f", player->GetTableID(), player->GetSeatID(), pBullet->BulletID, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z, skillID);
+					LogInfoToFile("WmBulletErr", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, byte:%d, dir:%f, %f, %f, pos:%f, %f, %f", player->GetTableID(), player->GetSeatID(), pBullet->BulletID, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z, skillID);
 				}
 				SendAll(pBullet);
 				//std::cout << "机器人发射子弹成功\n";
@@ -131,7 +131,7 @@ bool FishDesk::HandleNetCmd(PlayerID id, NetCmd *pCmd)
 			{
 				if (skillID == SkillType::SKILL_LOCK && pBullet->LockFishID == 0)// 锁定技能
 				{
-					LogInfoToFile("WmErrorLockLog.txt", "table=%d, seat=%d ", player->GetTableID(), player->GetSeatID());
+					LogInfoToFile("WmBulletErr", "table=%d, seat=%d ", player->GetTableID(), player->GetSeatID());
 				}
 				if (bty == BulletType::BULLET_TYPE_SHOT && skillID != SkillType::SKILL_LOCK)
 				{
@@ -182,7 +182,7 @@ bool FishDesk::HandleNetCmd(PlayerID id, NetCmd *pCmd)
 						
 						if (!ret)
 						{
-							LogInfoToFile("WmErrorLog.txt", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, byte:%d, dir:%f, %f, %f, pos:%f, %f, %f", player->GetTableID(), player->GetSeatID(), BulletID, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z, skillID);
+							LogInfoToFile("WmBulletErr", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, byte:%d, dir:%f, %f, %f, pos:%f, %f, %f", player->GetTableID(), player->GetSeatID(), BulletID, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z, skillID);
 						}
 						if (i == 0)
 						{
@@ -229,12 +229,12 @@ bool FishDesk::HandleNetCmd(PlayerID id, NetCmd *pCmd)
 					bool ret = m_pScene->GetBulletMgr()->Launch(id, pBullet->BulletID, player->GetLauncherType(), player->GetRateIndex(), speed, pBullet->Angle, dir, pos, pBullet->ReboundCount, pBullet->LockFishID, x, y, skillID,VipSkill,tabletype);
 					if (!ret)
 					{
-						LogInfoToFile("WmErrLog.txt", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, byte:%d, dir:%f, %f, %f, pos:%f, %f, %f", player->GetTableID(), player->GetSeatID(), pBullet->BulletID, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z);
+						LogInfoToFile("WmBulletErr", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, byte:%d, dir:%f, %f, %f, pos:%f, %f, %f", player->GetTableID(), player->GetSeatID(), pBullet->BulletID, player->GetLauncherType(), FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z);
 					}
 					//DWORD nConsume = player->BulletCosume();
 					//player->GetRoleExInfo()->ChangeRoleGlobe(nConsume * (-1),false);
 
-					LogInfoToFile("WmLog.txt", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, fish=%d byte:%d, dir:%f, %f, %f, pos:%f, %f, %f bombpos.x=%f bomb.y=%f ,ReboundCount=%d", player->GetTableID(), player->GetSeatID(), pBullet->BulletID, player->GetLauncherType(), pBullet->LockFishID, FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z, pBullet->BombX, pBullet->BombY, pBullet->ReboundCount);
+					//LogInfoToFile("WmLog.txt", "table=%d, seat=%d ,发射子弹:%d, launcherType:%d, fish=%d byte:%d, dir:%f, %f, %f, pos:%f, %f, %f bombpos.x=%f bomb.y=%f ,ReboundCount=%d", player->GetTableID(), player->GetSeatID(), pBullet->BulletID, player->GetLauncherType(), pBullet->LockFishID, FishCallback::GetFishSetting()->GetBulletSpeed(player->GetLauncherType()), dir.x, dir.x, dir.z, pos.x, pos.y, pos.z, pBullet->BombX, pBullet->BombY, pBullet->ReboundCount);
 					SendAll(pBullet);
 					//LogInfoToFile("WmGoldLog.txt", "send BulletID=%d, userid=%d ", pBullet->BulletID, player->GetID() );
 				}

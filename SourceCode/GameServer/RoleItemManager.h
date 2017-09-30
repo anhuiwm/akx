@@ -50,7 +50,7 @@ public:
 	bool OnDelUserItem(DWORD ItemOnlyID, DWORD ItemID, DWORD ItemSum);
 	bool OnQueryDelUserItemList(vector<tagItemOnce>& pVec, DWORD Currey, bool bQuery = true);//删除多种物品的时候  一次性进行判断 
 	void OnUpdateByMin(bool IsHourChange, bool IsDayChange, bool IsMonthChange, bool IsYearChange);
-
+	void LogItemToDB(DWORD dwUserID, int ItemID, int ItemSum, int EndItemSum, const TCHAR *pcStr);
 	DWORD QueryItemCount(DWORD ItemID);
 	DWORD QueryItemAllTimeCount(DWORD ItemID);
 	bool IsLoadDB(){ return m_IsLoadDB; }

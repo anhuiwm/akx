@@ -151,12 +151,19 @@ struct Con_Rp //概率 付出与回报
 	static float s_effecttime;
 };
 
-struct Randomtime //鱼的概率
+struct Con_Recharge //充值影响捕获率
 {
-	static int s_cycle;
-	static float s_reviseratio1;
-	static float s_reviseratio2;
+	int  price;
+	int  timesec;
+	float  ratio;
 };
+
+//struct Randomtime //鱼的概率
+//{
+//	static int s_cycle;
+//	static float s_reviseratio1;
+//	static float s_reviseratio2;
+//};
 
 struct Con_Production //产量决定概率
 {
@@ -208,6 +215,7 @@ struct Con_StockItem
 {
 	static float s_stockscore[MAX_TABLE_TYPE+1];   //底
 	static float   s_tax[MAX_TABLE_TYPE + 1];//税
+	static float   s_taxscore[MAX_TABLE_TYPE + 1];
 	__int64 stockscore;
 	float reviseratio1;
 	float reviseratio2;
@@ -222,6 +230,21 @@ struct Con_Pool
 	float reviseratio2;
 };
 
+struct RandomTimeInfo
+{
+	int   RateValue;
+	int	  TimeSec;
+	float reviseratio1;
+	float reviseratio2;
+};
+struct Con_RandomTime
+{
+	int		TotalRateValue;
+	vector<RandomTimeInfo> DroupVec;
+
+	float GetRandomTimeRatio(int& TimeSec);
+	void clear();
+};
 
 //template<class T>
 //class Vec :public vector<T>
@@ -263,6 +286,7 @@ typedef vector<Con_LuckItem>Luck_Vec;
 typedef vector<Con_Pool>Pool_Vec;
 typedef std::map<__int64, Con_StockItem>StockType_Map;
 typedef std::map<byte, StockType_Map>Stock_Map;
+typedef std::map<DWORD, Con_Recharge>Re_Map;
 
 class TableManager;
 class CConfig :public IFishSetting
@@ -316,11 +340,12 @@ public:
 	byte  BulletConsume(byte LauncherType);
 	ushort  BulletMultiple(byte byIndex);
 
-	float CalRandom(float d1, float d2);
+	static float CalRandom(float d1, float d2);
 	float CalBaseRatio(BYTE cbCannoIndex, BYTE cbFishIndex);
 	bool LoadConfig(char szDir[]);	
 
-
+	int RechargeTimeSec(DWORD dwRecharge);
+	float RechargeRate(DWORD dwRecharge);
 	float RpRate(float nRp);
 	float ProductionRate(int nProducntion);
 	float RankRate(int nLevel);
@@ -330,9 +355,10 @@ public:
 	float LuckRate(int nLuck);
 	float PoolRate(int nPool);
 
+	float RandomTimeRate(int& TimeSec);
 	int GetLevle(int nExperience);
 
-	int RandomCatchCycle();
+	//int RandomCatchCycle();
 	int RpCycle();
 	int RpEffectCycle();
 	int FishCount();
@@ -376,6 +402,7 @@ public:
 	__int64 GetStaticStockScore(int type);
 	float GetStockTax(int type);
 	void AddStaticStockScore(int type, float score);
+	void AddTaxStockScore(int type, float score);
 	float StockRate(int type,__int64 stockscore);
 private:
 	int  m_nServerVersion;
@@ -387,7 +414,6 @@ private:
 	Cannon_Vec m_Cannon;
 	Fish_Vec m_Fish;
 	Rp_Vec m_Rp;
-	Randomtime m_RandomTime;
 	Production_Vec m_production;
 	Rank_Vec m_Rank;
 	Playtime_Vec m_PlayTime;
@@ -395,6 +421,8 @@ private:
 	Luck_Vec   m_VceLuck;
 	Pool_Vec   m_GoldPool;
 	Stock_Map  m_Stock;
+	Re_Map     m_Recharge;
+	Con_RandomTime m_RandomTime;
 	TableManager *m_pTableManager;
 };
 #endif

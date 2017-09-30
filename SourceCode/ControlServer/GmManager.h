@@ -6,6 +6,7 @@
 #define NUM		 "num"
 #define CONTENT  "content"
 #define TARGET	 "target"
+#define SIGN     "sign"
 
 struct GmCrcInfo
 {
@@ -14,7 +15,7 @@ struct GmCrcInfo
 	DWORD      num	;
 	DWORD      content;
 	DWORD      target;
-
+	DWORD      sign;
 	GmCrcInfo()
 	{
 		type  = AECrc32(TYPE,strlen(TYPE),0);
@@ -22,6 +23,7 @@ struct GmCrcInfo
 		num = AECrc32(NUM, strlen(NUM), 0);
 		content = AECrc32(CONTENT, strlen(CONTENT), 0);
 		target = AECrc32(TARGET, strlen(TARGET), 0);
+		sign = AECrc32(SIGN, strlen(SIGN), 0);
 	}
 };
 
@@ -33,7 +35,8 @@ enum GM_TYPE
 	GT_Kick = 4,
 	GT_ReloadConfig = 5,
 	GT_HandleEntityItem = 6,
-
+	GT_SetBlackList = 7,
+	GT_UnSetBlackList = 8,
 };
 class GmManager
 {
@@ -50,13 +53,15 @@ public:
 	TCHAR* TransformUTF8ToUnicodeM(const char* _str);
 
 	void OnInit();
-	bool OnHandleHttpInfoByGm(string type, string id, string num, string content, string target);
+	bool OnHandleHttpInfoByGm(string type, string id, string num, string content, string target,string sign);
 	bool GmCharge(string& id, string& num, string& content, string& target);
 	bool GmMail(string& id, string& num, string& content, string& target);
 	bool GmSendBroad(string& id, string& num, string& content, string& target);
 	bool GmKick(string& id, string& num, string& content, string& target);
 	bool GmReloadconfig(string& id, string& num, string& content, string& target);
 	bool GmHandleEntityItem(string& id, string& num, string& content, string& target);
+	bool GmSetBlackList(string& id, string& num, string& content, string& target);
+	bool GmUnSetBlackList(string& id, string& num, string& content, string& target);
 
 private:
 	GmCrcInfo						m_GmCrcInfo;

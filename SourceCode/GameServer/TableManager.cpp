@@ -85,7 +85,7 @@ void TableManager::OnInit()
 		//	return;
 		//}
 		//m_TimerRanomCatch.StartTimer(m_pGameConfig->RandomCatchCycle()*MINUTE2SECOND, REPEATTIMER);//?
-		m_TimerRanomCatch.StartTimer(m_pGameConfig->RandomCatchCycle(), REPEATTIMER);//?
+		//m_TimerRanomCatch.StartTimer(m_pGameConfig->RandomCatchCycle(), REPEATTIMER);//?
 		m_TimerRp.StartTimer(m_pGameConfig->RpCycle(), REPEATTIMER);
 		m_TimerGameTime.StartTimer(GAME_TIME_SPACE, REPEATTIMER);
 	}
@@ -140,11 +140,11 @@ void TableManager::Update(DWORD dwTimeStep)
 	float TimeStep = (dwTimeStep - m_LastUpdate) * 0.001f;
 	m_LastUpdate = dwTimeStep;
 
-	if (m_TimerRanomCatch.Update(TimeStep))
-	{
+	//if (m_TimerRanomCatch.Update(TimeStep))
+	//{
 
-		//m_pGameConfig->RandomdFishByTime();
-	}
+	//	//m_pGameConfig->RandomdFishByTime();
+	//}
 
 	bool m_bUpdateTime = m_TimerGameTime.Update(TimeStep);
 	bool m_bUpdateRp = m_TimerRp.Update(TimeStep);
@@ -785,17 +785,49 @@ std::list<DWORD> TableManager::GetBlackList()
 	return m_blacklist;
 }
 
-bool TableManager::SetBlackList(DWORD *pid, BYTE byCount)
+//bool TableManager::SetBlackList(DWORD *pid, BYTE byCount)
+//{
+//	if (pid == NULL || byCount == 0)
+//	{
+//		return false;
+//	}
+//	m_blacklist.clear();
+//	for (int i = 0; i < byCount; i++)
+//	{
+//		m_blacklist.push_back(pid[i]);
+//	}	
+//	return true;
+//}
+
+bool TableManager::SetBlackList(DWORD UserID)
 {
-	if (pid == NULL || byCount == 0)
+	if (!Isabhor(UserID))
 	{
-		return false;
+		m_blacklist.push_back(UserID);
 	}
-	m_blacklist.clear();
-	for (int i = 0; i < byCount; i++)
+	std::cout << "start black list:" << endl;
+	for (auto id : m_blacklist)
 	{
-		m_blacklist.push_back(pid[i]);
-	}	
+		std::cout << id << endl;
+	}
+	std::cout << "end" << endl;
+
+	return true;
+}
+
+bool TableManager::UnSetBlackList(DWORD UserID)
+{
+	auto it = std::find(m_blacklist.begin(), m_blacklist.end(), UserID);
+	if (it != m_blacklist.end())
+	{
+		m_blacklist.erase(it);
+	}
+	std::cout << "start" << endl;
+	for (auto id : m_blacklist)
+	{
+		std::cout << id << endl;
+	}
+	std::cout << "end" << endl;
 	return true;
 }
 

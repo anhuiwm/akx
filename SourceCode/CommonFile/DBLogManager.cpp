@@ -9,15 +9,16 @@ DBLogManager::~DBLogManager()
 
 }
 
-void DBLogManager::LogItemToDB(DWORD dwUserID, int ItemID, int ItemSum, int itemEndtime, const TCHAR *pcStr, SendMsgFun pSend)//记录到LOG去
+void DBLogManager::LogItemToDB(DWORD dwUserID, int ItemID, int ItemSum, int EndItemSum, const TCHAR *pcStr, SendMsgFun pSend)//记录到LOG去
 {
 	DBR_Cmd_LogInfo msg;
 	SetMsgInfo(msg, DBR_LogInfo, sizeof(DBR_Cmd_LogInfo));
 	TCHARCopy(msg.Info, CountArray(msg.Info), pcStr, _tcslen(pcStr));
 	msg.UserID = dwUserID;
-	//msg.Type = Type;
-	//msg.TypeSum = TypeSum;
-	//msg.Param = Param;
+	msg.Type = LT_NORMAL;
+	msg.TypeSum = ItemID;
+	msg.Param = ItemSum;
+	msg.EndParam = EndItemSum;
 	pSend(&msg);
 }
 
@@ -30,6 +31,7 @@ void DBLogManager::LogToDB(DWORD dwUserID, LogType Type, int TypeSum, DWORD Para
 	msg.Type = Type;
 	msg.TypeSum = TypeSum;
 	msg.Param = Param;
+	msg.EndParam = 0;
 	pSend(&msg);
 }
 void DBLogManager::LogUserRechargeLogToDB(string OrderStates, string OrderID, DWORD UserID, string ChannelCode, string ChannelOrderID, string ChannelLabel, 
@@ -304,13 +306,14 @@ void DBLogManager::LogCarInfoToDB(DWORD BanderUserID, UINT64 AreaGlobel[MAX_CAR_
 	pSend(&msg);
 }
 
-void DBLogManager::LogStockScoreToDB(WORD ServerID, BYTE TableType, __int64 StockScore, SendMsgFun pSend)
+void DBLogManager::LogStockScoreToDB(WORD ServerID, BYTE TableType, __int64 StockScore, __int64 taxScore, SendMsgFun pSend)
 {
 	DBR_Cmd_LogStockScore msg;
 	SetMsgInfo(msg, DBR_LogStockScore, sizeof(DBR_Cmd_LogStockScore));
 	msg.ServerID = ServerID;
 	msg.TableType = TableType;
 	msg.StockScore = StockScore;
+	msg.TaxScore = taxScore;
 	pSend(&msg);
 }
 

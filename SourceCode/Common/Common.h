@@ -90,11 +90,7 @@ class HashMap: public unordered_map<K, T>
 };
 #endif
  
-
-
-
-
-
+extern BYTE  g_ServerID;
 //#ifdef _DEBUG
 //#define ASSERT assert
 //#else
@@ -102,12 +98,15 @@ static void LogErrorToFile(bool IsError, const char* FileName, const char* Funti
 {
 	if (IsError)
 		return;
-	//写入到文件里面去 Log.txt
+
+	char fname[64] = { 0 };
+	sprintf_s(fname, 64, "Log\\WmAssert[%d].txt", g_ServerID);
+
 	FILE* pFile = NULL;
-	errno_t Error = fopen_s(&pFile, "WmAssertLog.txt", "a");
+	errno_t Error = fopen_s(&pFile, fname, "a");
 	if (!pFile)
 	{
-		Error = fopen_s(&pFile, "WmAssertLog.txt", "w+");
+		Error = fopen_s(&pFile, fname, "w+");
 	}
 	if (pFile)
 	{
@@ -1356,32 +1355,35 @@ inline string GBKToUTF8(const std::string& strGBK)
 
 #define TCHARCopy(DestTChar,DestTCharLength,SrcTChar,SrcTCharLength) DestTCharLength >= (SrcTCharLength + 1) ? _tcsncpy_s(DestTChar, DestTCharLength, SrcTChar, SrcTCharLength) : ASSERT(false)
 
-
 static void LogInfoToFile(const char* FileName,const WCHAR *pcStr, ...)
 {
 	//setlocale(LC_ALL, "Chinese-simplified");
-	
 	va_list var;
 	va_start(var, pcStr);
 	UINT nCount = _vscwprintf(pcStr, var);
 	WCHAR *pBuffer = new WCHAR[nCount + 1];
 	if (pBuffer)
 	{
+		SYSTEMTIME pTime;
+		GetLocalTime(&pTime);
+		char fname[64] = { 0 };
+		//sprintf_s(fname,64, "%s-%d-%d-%d.txt", fname, pTime.wYear, pTime.wMonth, pTime.wDay);
+		sprintf_s(fname, 64, "Log\\%s[%d]-%d-%d-%d.txt", FileName, g_ServerID, pTime.wYear, pTime.wMonth, pTime.wDay);
 		vswprintf_s(pBuffer, nCount + 1, pcStr, var);
 		
 		FILE* pFile = NULL;
-		errno_t Error = fopen_s(&pFile, FileName, "a");
+		errno_t Error = fopen_s(&pFile, fname, "a");
 		if (!pFile || Error!=0)
 		{
-			Error = fopen_s(&pFile, FileName, "w+");
+			Error = fopen_s(&pFile, fname, "w+");
 		}
 		if (!pFile || Error != 0)
 		{
 			return;
 		}
-		SYSTEMTIME pTime;
-		GetLocalTime(&pTime);
-		fwprintf_s(pFile, TEXT("%ls %04d-%02d-%02d %02d:%02d:%02d\n"), pBuffer, pTime.wYear, pTime.wMonth, pTime.wDay, pTime.wHour, pTime.wMinute, pTime.wSecond);
+		fwprintf_s(pFile, TEXT("%ls %02d:%02d:%02d\n"), pBuffer, pTime.wHour, pTime.wMinute, pTime.wSecond);
+
+		//fwprintf_s(pFile, TEXT("%ls %04d-%02d-%02d %02d:%02d:%02d\n"), pBuffer, pTime.wYear, pTime.wMonth, pTime.wDay, pTime.wHour, pTime.wMinute, pTime.wSecond);
      	fclose(pFile);
 		SAFE_DELETE_ARR(pBuffer);
 	}
@@ -1397,24 +1399,26 @@ static void LogInfoToFile(const char* FileName, const char *pcStr, ...)
 	char *pBuffer = new char[nCount + 1];
 	if (pBuffer)
 	{
+		SYSTEMTIME pTime;
+		GetLocalTime(&pTime);
+		char fname[64] = { 0 };
+		sprintf_s(fname,64, "Log\\%s[%d]-%d-%d-%d.txt", FileName,g_ServerID,pTime.wYear, pTime.wMonth, pTime.wDay);
 		vsprintf_s(pBuffer, nCount + 1, pcStr, var);
 		FILE* pFile = NULL;
-		errno_t Error = fopen_s(&pFile, FileName, "a");
+		errno_t Error = fopen_s(&pFile, fname, "a");
 		if (!pFile || Error != 0)
 		{
-			Error = fopen_s(&pFile, FileName, "w+");
+			Error = fopen_s(&pFile, fname, "w+");
 		}
 		if (!pFile || Error != 0)
 		{
 			return;
 		}
-
-		SYSTEMTIME pTime;
-		GetLocalTime(&pTime);
-
-		fprintf_s(pFile, "%s %04d-%02d-%02d %02d:%02d:%02d\n", pBuffer, pTime.wYear, pTime.wMonth, pTime.wDay, pTime.wHour, pTime.wMinute, pTime.wSecond);
+		fprintf_s(pFile, "%s %02d:%02d:%02d\n", pBuffer, pTime.wHour, pTime.wMinute, pTime.wSecond);
+		//fprintf_s(pFile, "%s %04d-%02d-%02d %02d:%02d:%02d\n", pBuffer, pTime.wYear, pTime.wMonth, pTime.wDay, pTime.wHour, pTime.wMinute, pTime.wSecond);
 		fclose(pFile);
 		SAFE_DELETE_ARR(pBuffer);
 	}
 	va_end(var);
 }
+

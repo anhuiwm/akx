@@ -166,7 +166,7 @@ void RoleMessageStates::OnChangeRoleMessageStates(RoleMessageType Type, bool IsS
 	if (OldStates == m_StatesValue)
 		return;
 
-	LogInfoToFile("WmRmt.txt", "m_StatesValue=%x"	, m_StatesValue);
+	//LogInfoToFile("WmRmt.txt", "userid=%d m_StatesValue=%x"	,m_pRole->GetUserID(), m_StatesValue);
 	//都发送到客户端去
 	if (IsSendToClient)
 	{

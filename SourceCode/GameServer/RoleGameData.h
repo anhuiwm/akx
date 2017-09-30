@@ -23,7 +23,7 @@ public:
 	bool IsLoadDB(){ return m_IsLoadDB; }
 	//关于玩家记录数据的具体处理函数 根据功能写死 无须特殊处理
 	void OnHandleCatchFish(BYTE FishID);
-	void OnHandleRoleGetGlobel(DWORD AddGlobel);//玩家获得金币
+	void OnHandleRoleGetGlobel(int AddGlobel);//玩家获得金币
 	void OnHandleRoleMonthReward(int RewardIndex);//玩家获得比赛的名称
 
 	void OnHandleRoleJoinTable(bool IsMonth);

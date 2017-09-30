@@ -381,7 +381,7 @@ bool RoleItemManger::OnAddUserItem(tagItemOnce& pItem)
 		break;
 	case IT_Medal:
 		{
-			m_pUser->ChangeRoleMedal(pItem.ItemSum, TEXT("往背包添加物品 发现为奖牌类型 添加奖牌"));
+			m_pUser->ChangeRoleMedal(pItem.ItemSum, TEXT("往背包添加奖牌"));
 			return true;
 		}
 		break;
@@ -399,7 +399,7 @@ bool RoleItemManger::OnAddUserItem(tagItemOnce& pItem)
 		break;
 	case IT_Currey:
 		{
-			m_pUser->ChangeRoleCurrency(pItem.ItemSum,TEXT("往背包添加物品 发现为钻石类型 添加钻石"));
+			m_pUser->ChangeRoleCurrency(pItem.ItemSum,TEXT("往背包添加钻石"));
 			return true;
 		}
 		break;
@@ -498,7 +498,7 @@ bool RoleItemManger::OnAddUserItem(tagItemOnce& pItem)
 		{
 			//if (ItemType == IT_GlobelBag)
 			{
-				g_DBLogManager.LogToDB(m_pUser->GetUserID(), LT_GlobelBag, static_cast<int>(pItem.ItemSum), 0, TEXT("背包里添加物品 物品为聚宝盆"), SendLogDB);
+				g_DBLogManager.LogToDB(m_pUser->GetUserID(), LT_GlobelBag, static_cast<int>(pItem.ItemID), pItem.ItemSum, TEXT("背包里添加物品"), SendLogDB);
 			}
 			//普通物品添加到背包里面去
 			HashMap<DWORD, tagItemType*>::iterator  IterFind = m_ItemMap.find(pItem.ItemID);
@@ -726,6 +726,10 @@ DWORD RoleItemManger::QueryItemAllTimeCount(DWORD ItemID)
 	else
 		return 0;
 }
+void RoleItemManger::LogItemToDB(DWORD dwUserID, int ItemID, int ItemSum, int EndItemSum, const TCHAR *pcStr)
+{
+	g_DBLogManager.LogItemToDB(dwUserID, ItemID, ItemSum, EndItemSum, pcStr, SendLogDB);
+}
 void RoleItemManger::OnUpdateByMin(bool IsHourChange, bool IsDayChange, bool IsMonthChange, bool IsYearChange)
 {
 	HashMap<DWORD, tagItemType*>::iterator  Iter = m_ItemMap.begin();
@@ -776,12 +780,11 @@ void tagItemType::OnInit(CRoleEx* pRole, RoleItemManger* pManager)
 }
 void tagItemType::LoadItem(tagItemInfo& pInfo)
 {
-	//AllItemSum += pInfo.ItemSum;
-	if (pInfo.EndTime == 0)
+#if 1
+	if (!g_FishServer.GetFishConfig().IsTimeItem(pInfo.ItemID))//数量道具
 	{
-		if (NonTimeItem.ItemID != 0)
+		if (NonTimeItem.ItemID != 0)//已经有了 纠正错误
 		{
-			//ASSERT(false);
 			NonTimeItem.ItemSum += pInfo.ItemSum;
 
 			if (pInfo.ItemOnlyID != 0)
@@ -802,7 +805,7 @@ void tagItemType::LoadItem(tagItemInfo& pInfo)
 
 			if (NonTimeItem.ItemID == m_pItemManager->GetGoldBulletID())
 			{
-				m_pRole->SaveRoleGoldBulletNum(msgChange.ItemSum,TEXT("LOAD"));
+				m_pRole->SaveRoleGoldBulletNum(msgChange.ItemSum,TEXT("数据库加载错误重写"));
 			}
 			return;
 		}
@@ -810,12 +813,50 @@ void tagItemType::LoadItem(tagItemInfo& pInfo)
 	}
 	else
 	{
-#if 0
-		TimeItem.insert(HashMap<DWORD, tagItemInfo>::value_type(pInfo.ItemOnlyID, pInfo));
-#else 
 		TimeItem = pInfo;
-#endif
 	}
+#else
+	//AllItemSum += pInfo.ItemSum;
+	if (pInfo.EndTime == 0)
+	{
+		if (NonTimeItem.ItemID != 0)
+		{
+			//ASSERT(false);
+			NonTimeItem.ItemSum += pInfo.ItemSum;
+
+			if (pInfo.ItemOnlyID != 0)
+			{
+				DBR_Cmd_DelUserItem msg;
+				SetMsgInfo(msg, DBR_DelUserItem, sizeof(DBR_Cmd_DelUserItem));
+				msg.ItemOnlyID = pInfo.ItemOnlyID;
+				g_FishServer.SendNetCmdToSaveDB(&msg);
+			}
+
+			DBR_Cmd_ChangeUserItem msgChange;
+			SetMsgInfo(msgChange, DBR_ChangeUserItem, sizeof(DBR_Cmd_ChangeUserItem));
+			msgChange.ItemOnlyID = NonTimeItem.ItemOnlyID;
+			msgChange.ItemSum = NonTimeItem.ItemSum;
+			msgChange.ItemID = NonTimeItem.ItemID;
+			msgChange.EndTime = 0;
+			g_FishServer.SendNetCmdToSaveDB(&msgChange);
+
+			if (NonTimeItem.ItemID == m_pItemManager->GetGoldBulletID())
+			{
+				m_pRole->SaveRoleGoldBulletNum(msgChange.ItemSum, TEXT("LOAD"));
+			}
+			return;
+		}
+		NonTimeItem = pInfo;
+	}
+	else
+	{
+		//#if 0
+		//		TimeItem.insert(HashMap<DWORD, tagItemInfo>::value_type(pInfo.ItemOnlyID, pInfo));
+		//#else 
+		TimeItem = pInfo;
+		//#endif
+	}
+#endif
 	return;
 }
 void tagItemType::Destroy()
@@ -841,6 +882,8 @@ DWORD tagItemType::AllItemSum()
 		return NonTimeItem.ItemSum;
 	}
 }
+
+
 bool tagItemType::AddItem(tagItemOnce& pItem)
 {
 	if (!m_pRole)
@@ -864,7 +907,7 @@ bool tagItemType::AddItem(tagItemOnce& pItem)
 	{
 		if (pItem.LastMin == 0)//时间为0
 		{
-			LogInfoToFile("WmItemError.txt", "time itemid=%u, itemsum=%u ,lastmin=%u", pItem.ItemID, pItem.ItemSum, pItem.LastMin);
+			LogInfoToFile("WmItemError", "time itemid=%u, itemsum=%u ,lastmin=%u", pItem.ItemID, pItem.ItemSum, pItem.LastMin);
 			return true;
 		}
 		LastMin = pItem.LastMin;
@@ -873,15 +916,16 @@ bool tagItemType::AddItem(tagItemOnce& pItem)
 	{
 		if (pItem.ItemSum == 0)//物品数量为0
 		{
-			LogInfoToFile("WmItemError.txt", "no time itemid=%u, itemsum=%u ,lastmin=%u", pItem.ItemID, pItem.ItemSum, pItem.LastMin);
+			LogInfoToFile("WmItemError", "no time itemid=%u, itemsum=%u ,lastmin=%u", pItem.ItemID, pItem.ItemSum, pItem.LastMin);
 			return true;
 		}
 	}
 
-	LogInfoToFile("WmItem.txt", "adduserid=%u,itemid=%u, NonTimeItem.ItemSum=%u TimeItem.ItemSum=%u  additemsum=%u ,addlastmin=%u", m_pRole->GetUserID(), pItem.ItemID, NonTimeItem.ItemSum, TimeItem.ItemSum, pItem.ItemSum, pItem.LastMin);
+	LogInfoToFile("WmItem", "adduserid=%u,itemid=%u, NonTimeItem.ItemSum=%u TimeItem.ItemSum=%u  additemsum=%u ,addlastmin=%u", m_pRole->GetUserID(), pItem.ItemID, NonTimeItem.ItemSum, TimeItem.ItemSum, pItem.ItemSum, pItem.LastMin);
 
 	if (LastMin == 0 && NonTimeItem.ItemSum != 0)//非限时道具 并且已经插入直接改数量
 	{
+		DWORD PreSum = NonTimeItem.ItemSum;
 		NonTimeItem.ItemID = pItem.ItemID;
 		NonTimeItem.ItemSum += pItem.ItemSum;
 		//AllItemSum += pItem.ItemSum;
@@ -896,7 +940,7 @@ bool tagItemType::AddItem(tagItemOnce& pItem)
 
 		if (NonTimeItem.ItemID == m_pItemManager->GetGoldBulletID())
 		{
-			m_pRole->SaveRoleGoldBulletNum(msg.ItemSum, TEXT("ADD"));
+			m_pRole->SaveRoleGoldBulletNum(msg.ItemSum, TEXT("添加已有物品"));
 		}
 
 		//发送改变的命令到客户端去
@@ -911,13 +955,14 @@ bool tagItemType::AddItem(tagItemOnce& pItem)
 		}
 
 		m_pRole->GetRoleLauncherManager().OnAddItem(pItem.ItemID);
-		LogInfoToFile("WmItem.txt", "afteradduserid=%u,itemid=%u, NonTimeItem.ItemSum=%u TimeItem.ItemSum=%u  additemsum=%u ,addlastmin=%u", m_pRole->GetUserID(), pItem.ItemID, NonTimeItem.ItemSum, TimeItem.ItemSum, pItem.ItemSum, pItem.LastMin);
-
+		LogInfoToFile("WmItem", "afteradduserid=%u,itemid=%u, NonTimeItem.ItemSum=%u TimeItem.ItemSum=%u  additemsum=%u ,addlastmin=%u", m_pRole->GetUserID(), pItem.ItemID, NonTimeItem.ItemSum, TimeItem.ItemSum, pItem.ItemSum, pItem.LastMin);
+		m_pItemManager->LogItemToDB(m_pRole->GetUserID(), pItem.ItemID, PreSum, NonTimeItem.ItemSum, TEXT("添加数量道具"));
 		return true;
 	}
 
 	if (LastMin != 0 && TimeItem.EndTime != 0 ) //是限时物品
 	{
+		DWORD PreSum = TimeItem.EndTime;
 		TimeItem.ItemSum = 1;
 		TimeItem.EndTime += LastMin * 60 * pItem.ItemSum;
 		//发送命令修改物品时间 change
@@ -941,8 +986,8 @@ bool tagItemType::AddItem(tagItemOnce& pItem)
 		}
 
 		//m_pRole->GetRoleLauncherManager().OnAddItem(pItem.ItemID);
-		LogInfoToFile("WmItem.txt", "afteradduserid=%u,itemid=%u, NonTimeItem.ItemSum=%u TimeItem.ItemSum=%u  additemsum=%u ,addlastmin=%u", m_pRole->GetUserID(), pItem.ItemID, NonTimeItem.ItemSum, TimeItem.ItemSum, pItem.ItemSum, pItem.LastMin);
-
+		LogInfoToFile("WmItem", "afteradduserid=%u,itemid=%u, NonTimeItem.ItemSum=%u TimeItem.ItemSum=%u  additemsum=%u ,addlastmin=%u", m_pRole->GetUserID(), pItem.ItemID, NonTimeItem.ItemSum, TimeItem.ItemSum, pItem.ItemSum, pItem.LastMin);
+		m_pItemManager->LogItemToDB(m_pRole->GetUserID(), pItem.ItemID, PreSum, TimeItem.EndTime, TEXT("添加时间道具"));
 		return true;
 	}
 
@@ -961,22 +1006,17 @@ void tagItemType::OnAddItemResult(DBO_Cmd_AddUserItem* pMsg)
 		ASSERT(false);
 		return;
 	}
-	LogInfoToFile("WmItem.txt", "addresult:userid=%u NontimeSum=%u  timeendtime=%u itemid=%u, itemsum=%u ,EndTime=%u", m_pRole->GetUserID(),NonTimeItem.ItemSum,TimeItem.EndTime, pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
+	LogInfoToFile("WmItem", "addresult:userid=%u NontimeSum=%u  timeendtime=%u itemid=%u, itemsum=%u ,EndTime=%u", m_pRole->GetUserID(),NonTimeItem.ItemSum,TimeItem.EndTime, pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
 
 	if (g_FishServer.GetFishConfig().IsTimeItem(pMsg->ItemInfo.ItemID))//时间道具
 	{
 		if (pMsg->ItemInfo.EndTime == 0)//时间为0
 		{
-			LogInfoToFile("WmItemError.txt", "311 time itemid=%u, itemsum=%u ,EndTime=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
+			LogInfoToFile("WmItemError", "311 time itemid=%u, itemsum=%u ,EndTime=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
 			return ;
 		}
 
-		//if (TimeItem.ItemID != 0)
-		//{
-		//	LogInfoToFile("WmItemError.txt", "312 time itemid=%u, itemsum=%u ,EndTime=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
-		//	//NonTimeItem.ItemID = pMsg->ItemInfo.ItemID;
-		//	//return;
-		//}
+		DWORD TempItemSum = TimeItem.EndTime;
 		TimeItem = pMsg->ItemInfo;
 
 		//if (TimeItem.ItemID == m_pItemManager->GetGoldBulletID())
@@ -993,18 +1033,19 @@ void tagItemType::OnAddItemResult(DBO_Cmd_AddUserItem* pMsg)
 		}
 
 		m_pRole->GetRoleLauncherManager().OnAddItem(pMsg->ItemInfo.ItemID);
-		LogInfoToFile("WmItem.txt", "addresult:end:userid=%u NontimeSum=%u  timeendtime=%u itemid=%u, itemsum=%u ,EndTime=%u", m_pRole->GetUserID(), NonTimeItem.ItemSum, TimeItem.EndTime, pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
+		LogInfoToFile("WmItem", "addresult:end:userid=%u NontimeSum=%u  timeendtime=%u itemid=%u, itemsum=%u ,EndTime=%u", m_pRole->GetUserID(), NonTimeItem.ItemSum, TimeItem.EndTime, pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
+		m_pItemManager->LogItemToDB(m_pRole->GetUserID(), pMsg->ItemInfo.ItemID, TempItemSum, TimeItem.EndTime, TEXT("首次添加时间道具"));
 	}
 	else//数量
 	{
 		if (pMsg->ItemInfo.ItemSum == 0)
 		{
-			LogInfoToFile("WmItemError.txt", "321 notime itemid=%u, itemsum=%u ,EndTime=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
+			LogInfoToFile("WmItemError", "321 notime itemid=%u, itemsum=%u ,EndTime=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
 			return;
 		}
 		//if (NonTimeItem.ItemID != 0)
 		//{
-		//	LogInfoToFile("WmItemError.txt", "322 notime itemid=%u, itemsum=%u ,EndTime=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
+		//	LogInfoToFile("WmItemError", "322 notime itemid=%u, itemsum=%u ,EndTime=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
 		//	//return;
 		//}
 		DWORD TempItemSum = NonTimeItem.ItemSum;
@@ -1020,9 +1061,10 @@ void tagItemType::OnAddItemResult(DBO_Cmd_AddUserItem* pMsg)
 		m_pRole->GetRoleLauncherManager().OnAddItem(pMsg->ItemInfo.ItemID);
 		if (NonTimeItem.ItemID == m_pItemManager->GetGoldBulletID())
 		{
-			m_pRole->SaveRoleGoldBulletNum(NonTimeItem.ItemSum, TEXT("add result"));
+			m_pRole->SaveRoleGoldBulletNum(NonTimeItem.ItemSum, TEXT("首次添加数量道具"));
 		}
-		LogInfoToFile("WmItem.txt", "addresult:end:userid=%u NontimeSum=%u  timeendtime=%u itemid=%u, itemsum=%u ,EndTime=%u", m_pRole->GetUserID(), NonTimeItem.ItemSum, TimeItem.EndTime, pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
+		LogInfoToFile("WmItem", "addresult:end:userid=%u NontimeSum=%u  timeendtime=%u itemid=%u, itemsum=%u ,EndTime=%u", m_pRole->GetUserID(), NonTimeItem.ItemSum, TimeItem.EndTime, pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.EndTime);
+		m_pItemManager->LogItemToDB(m_pRole->GetUserID(), pMsg->ItemInfo.ItemID, TempItemSum, NonTimeItem.ItemSum, TEXT("首次添加数量道具"));
 	}
 }
 //bool tagItemType::DelItem(DWORD ItemOnlyID, DWORD ItemID, DWORD ItemSum)
@@ -1038,7 +1080,7 @@ void tagItemType::OnAddItemResult(DBO_Cmd_AddUserItem* pMsg)
 //		return false;
 //	if (g_FishServer.GetFishConfig().IsTimeItem(TimeItem.ItemID))//时间道具只有一个 //先删除限时道具
 //	{
-//		//LogInfoToFile("WmItem.txt", "deluserid=%u,itemid=%u,ItemSum=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(), ItemID, ItemSum,NonTimeItem.ItemSum, TimeItem.ItemSum);
+//		//LogInfoToFile("WmItem", "deluserid=%u,itemid=%u,ItemSum=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(), ItemID, ItemSum,NonTimeItem.ItemSum, TimeItem.ItemSum);
 //
 //		//DelItemSum = 1;// TimeItem.ItemSum;
 //		//发送删除的命令 DBR_Del
@@ -1058,7 +1100,7 @@ void tagItemType::OnAddItemResult(DBO_Cmd_AddUserItem* pMsg)
 //	}
 //	else//数量道具
 //	{
-//		//LogInfoToFile("WmItem.txt", "deluserid=%u,itemid=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(),ItemID, ItemSum,NonTimeItem.ItemSum, TimeItem.ItemSum);
+//		//LogInfoToFile("WmItem", "deluserid=%u,itemid=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(),ItemID, ItemSum,NonTimeItem.ItemSum, TimeItem.ItemSum);
 //
 //		if (NonTimeItem.ItemSum < ItemSum)
 //		{
@@ -1125,10 +1167,11 @@ bool tagItemType::DelItem(DWORD ItemID, DWORD ItemSum)
 		return true;
 	if (ItemSum > AllItemSum())
 		return false;
-	LogInfoToFile("WmItem.txt", "deluserid=%u,itemid=%u,ItemSum=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(), ItemID, ItemSum, NonTimeItem.ItemSum, TimeItem.ItemSum);
+	LogInfoToFile("WmItem", "deluserid=%u,itemid=%u,ItemSum=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(), ItemID, ItemSum, NonTimeItem.ItemSum, TimeItem.ItemSum);
 
 	if (g_FishServer.GetFishConfig().IsTimeItem(TimeItem.ItemID))//时间道具只有一个 //先删除限时道具
 	{
+		DWORD PreSum = TimeItem.ItemSum;
 		//DelItemSum = 1;// TimeItem.ItemSum;
 		//发送删除的命令 DBR_Del
 		DBR_Cmd_DelUserItem msg;
@@ -1144,11 +1187,12 @@ bool tagItemType::DelItem(DWORD ItemID, DWORD ItemSum)
 		}
 		ZeroMemory(&TimeItem, sizeof(TimeItem));
 		m_pRole->GetRoleLauncherManager().OnDelItem(ItemID);
+		m_pItemManager->LogItemToDB(m_pRole->GetUserID(), ItemID, PreSum, TimeItem.EndTime, TEXT("删除时间道具"));
 	}
 	else//数量道具
 	{
-		//LogInfoToFile("WmItem.txt", "deluserid=%u,itemid=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(),ItemID, ItemSum,NonTimeItem.ItemSum, TimeItem.ItemSum);
-
+		//LogInfoToFile("WmItem", "deluserid=%u,itemid=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(),ItemID, ItemSum,NonTimeItem.ItemSum, TimeItem.ItemSum);
+		DWORD PreSum = NonTimeItem.ItemSum;
 		if (NonTimeItem.ItemSum < ItemSum)
 		{
 			return false;
@@ -1199,8 +1243,10 @@ bool tagItemType::DelItem(DWORD ItemID, DWORD ItemSum)
 			}
 			m_pRole->GetRoleLauncherManager().OnDelItem(ItemID);
 		}
+
+		m_pItemManager->LogItemToDB(m_pRole->GetUserID(), ItemID, PreSum, NonTimeItem.ItemSum, TEXT("删除数量道具"));
 	}
-	LogInfoToFile("WmItem.txt", "afterdeluserid=%u,itemid=%u,ItemSum=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(), ItemID, ItemSum, NonTimeItem.ItemSum, TimeItem.ItemSum);
+	LogInfoToFile("WmItem", "afterdeluserid=%u,itemid=%u,ItemSum=%u, NonTimeItem.ItemSum=%u  TimeItem.ItemSum=%u ", m_pRole->GetUserID(), ItemID, ItemSum, NonTimeItem.ItemSum, TimeItem.ItemSum);
 
 	return true;
 }

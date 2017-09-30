@@ -49,9 +49,9 @@ int Con_Fish::s_flashfishradius;
 float Con_Rp::s_cycle = 0;
 float Con_Rp::s_effecttime = 0;
 
-int Randomtime::s_cycle = 0;
-float Randomtime::s_reviseratio1 = 0.0f;
-float Randomtime::s_reviseratio2 = 0.0f;
+//int Randomtime::s_cycle = 0;
+//float Randomtime::s_reviseratio1 = 0.0f;
+//float Randomtime::s_reviseratio2 = 0.0f;
 
 const float PRECISION = 0.0001f;//控制精度
 const float ENLARGE = 100000.0f;
@@ -66,7 +66,7 @@ vector<int> Con_Rate::material_ids;
 
 float Con_StockItem::s_stockscore[MAX_TABLE_TYPE + 1] = {0.0f};
 float Con_StockItem::s_tax[MAX_TABLE_TYPE + 1] = { 0.0f };
-
+float Con_StockItem::s_taxscore[MAX_TABLE_TYPE + 1] = { 0.0f };
 using namespace tinyxml2;
 bool Attribute(const XMLElement*pElement, const char*pName, int&nvalue)
 {
@@ -92,7 +92,27 @@ bool Attribute(const XMLElement*pElement, const char*pName, float&fvalue)
 	return false;
 }
 
-
+float Con_RandomTime::GetRandomTimeRatio(int& TimeSec)
+{
+	if (DroupVec.empty())
+		return 0;
+	int RandValue = RandUInt() % TotalRateValue;
+	vector<RandomTimeInfo>::iterator Iter = DroupVec.begin();
+	for (; Iter != DroupVec.end(); ++Iter)
+	{
+		if (RandValue < Iter->RateValue)
+		{
+			TimeSec = Iter->TimeSec;
+			return CConfig::CalRandom(Iter->reviseratio1, Iter->reviseratio2);
+		}
+	}
+	return 0.0f;
+}
+void Con_RandomTime::clear()
+{
+	TotalRateValue = 0;
+	DroupVec.clear();
+}
 CConfig::CConfig(TableManager *pTableManager)
 {
 	m_nServerVersion = 0;
@@ -124,7 +144,8 @@ bool CConfig::LoadConfig(char szDir[])
 		m_VceLuck.clear();
 		m_GoldPool.clear();
 		m_Stock.clear();
-
+		m_Recharge.clear();
+		m_RandomTime.clear();
 	}
 
 	tinyxml2::XMLDocument xml_doc;
@@ -352,11 +373,31 @@ bool CConfig::LoadConfig(char szDir[])
 				m_Rp.push_back(rp_item);
 			}
 		}
+		else if (!strcmp(xml_child->Value(), "Recharges"))
+		{
+			for (const XMLElement* xml_data = xml_child->FirstChildElement(); xml_data; xml_data = xml_data->NextSiblingElement())
+			{
+				Con_Recharge re_item = { 0 };
+				Attribute(xml_data, "price", re_item.price);
+				Attribute(xml_data, "timesec",re_item.timesec);
+				Attribute(xml_data, "ratio", re_item.ratio);
+
+				m_Recharge.insert(make_pair(re_item.price,re_item));
+			}
+		}
 		else if (!strcmp(xml_child->Value(), "Randomtime"))
 		{
-			Attribute(xml_child, "cycle", Randomtime::s_cycle);
-			Attribute(xml_child, "reviseratio1", Randomtime::s_reviseratio1);
-			Attribute(xml_child, "reviseratio2", Randomtime::s_reviseratio2);
+			for (const XMLElement* xml_data = xml_child->FirstChildElement(); xml_data; xml_data = xml_data->NextSiblingElement())
+			{
+				RandomTimeInfo item = { 0 };
+				Attribute(xml_data, "Chances", item.RateValue);
+				Attribute(xml_data, "timesec", item.TimeSec);
+				Attribute(xml_data, "reviseratio1", item.reviseratio1);
+				Attribute(xml_data, "reviseratio2", item.reviseratio2);
+				m_RandomTime.TotalRateValue += item.RateValue;
+				item.RateValue = m_RandomTime.TotalRateValue;
+				m_RandomTime.DroupVec.push_back(item);
+			}
 		}
 		else if (!strcmp(xml_child->Value(), "Production"))
 		{
@@ -456,6 +497,10 @@ bool CConfig::LoadConfig(char szDir[])
 				if (type > MAX_TABLE_TYPE)
 				{
 					return false;
+				}
+				if (m_Stock.find(type) != m_Stock.end())
+				{
+					continue;
 				}
 				Con_StockItem::s_stockscore[type] = basescore;
 				Attribute(xml_type_data, "tax", Con_StockItem::s_tax[type]);
@@ -649,8 +694,10 @@ float CConfig::CatchChance(PlayerID player, USHORT bulletId, byte bulletType, by
 	}
 
 	CRole *pPlayer = m_pTableManager->SearchUser(player);
+
 	if (pPlayer)
 	{
+
 		float fcombobuff = 0.0f;
 		if (pPlayer->IsComboBuff(bulletId))
 		{
@@ -667,29 +714,33 @@ float CConfig::CatchChance(PlayerID player, USHORT bulletId, byte bulletType, by
 			fstock = StockRate(pTable->GetTableTypeID(),stockscore);
 		}
 		float fbase = CalBaseRatio(bulletType, fishType);//基础概率
-		float fRandTime = pPlayer->RandTimeRate(Randomtime::s_reviseratio1, Randomtime::s_reviseratio2, fishType);
+		int TimeSec = 0;
+		float fRandTime = pPlayer->RandTimeRate();// m_RandomTime.GetRandomTimeRatio(TimeSec);//pPlayer->RandTimeRate(Randomtime::s_reviseratio1, Randomtime::s_reviseratio2, fishType);
 		float fLockRate = bLocked ? Con_Cannon::s_lockratio : 0;//锁定增加概率
-
+		//std::cout <<"rand:"<< fRandTime << endl;
+		float frp = RpRate(pPlayer->GetRp());
+		//float fProduction = ProductionRate(pPlayer->GetProduction());
+		//float fMoney = MoneyRate(pPlayer->GetScore());			
+		float fRank = RankRate(pPlayer->GetLevel());
+		float fGameTime = GameTimeRate(pPlayer->GetGameTime());
+		float fRecharge = pPlayer->RechargeRate();
 		int64 nPoolGold;
 		int nLuck = pPlayer->GetRoleLuckyValue();		
 		if (m_pTableManager->QueryPool(pPlayer->GetTableID(), nPoolGold) && nLuck!=0)//奖池触发,有幸运值
 		{						
 			float fluck = LuckRate(nLuck);
-			fbase *= (1 + fRandTime + fluck + fLockRate + fcombobuff + fstock);
+			//fbase *= (1 + fRandTime + fluck + fLockRate + fcombobuff + fstock);
+			fbase *= (1 + fRandTime + fRank + fGameTime + fluck + fLockRate + fcombobuff + fstock + frp + fRecharge);
 		}
 		else
 		{
-			float frp = RpRate(pPlayer->GetRp());
-			//float fProduction = ProductionRate(pPlayer->GetProduction());
-			//float fMoney = MoneyRate(pPlayer->GetScore());			
-			float fRank = RankRate(pPlayer->GetLevel());
-			float fGameTime = GameTimeRate(pPlayer->GetGameTime());			
-			float fPool = PoolRate((int)nPoolGold / pPlayer->TableRate());
+	
+			float fPool = PoolRate((int)nPoolGold / pPlayer->TableRate());		
 			if (pPlayer->GetRoleExInfo() && pPlayer->GetRoleExInfo()->GetRoleMonth().IsInMonthTable())
 			{
 				fPool=0;
 			}
-			fbase *= (1 + fRandTime + fRank + fGameTime + fPool + fLockRate + fcombobuff + fstock + frp);
+			fbase *= (1 + fRandTime + fRank + fGameTime + fPool + fLockRate + fcombobuff + fstock + frp + fRecharge);
 
 	/*		{
 				char szKey[20] = { 0 };
@@ -709,12 +760,19 @@ float CConfig::CatchChance(PlayerID player, USHORT bulletId, byte bulletType, by
 		}
 		fbase *= m_Cannon[bulletType].vCollision[byIndex];
 		fbase *= PackageFactor(byPackageType);
+
+		CRoleEx* pRole = pPlayer->GetRoleExInfo();
+		if (pRole)
+		{
+			fbase *= pRole->GetRoleVip().AddCatchFishRate();
+		}
 		fbase = min(fbase, Con_Cannon::s_finalratio);
 		//fbase = 1.0f; // wm todo
 		if (m_pTableManager->Isabhor(player))
 		{
 			fbase /= 2;
 		}
+		//std::cout << fbase << endl;
 		return fbase;
 	}
 	return 0;
@@ -1058,7 +1116,7 @@ USHORT CConfig::FishRewardDrop(PlayerID id, BYTE byPackageType,USHORT byType, bo
 				fDropChance *= fdropother;
 			}
 			
-			LogInfoToFile("WmDmq.txt", " playerID=%d   FishType=%d  catchChance=%f", id, byType, fDropChance);
+			//LogInfoToFile("WmDmq.txt", " playerID=%d   FishType=%d  catchChance=%f", id, byType, fDropChance);
 
 			if (RandFloat() < fDropChance)
 			{
@@ -1121,9 +1179,6 @@ ushort  CConfig::BulletMultiple(byte byIndex)
 	return ConvertIntToWORD(m_Rate[byIndex].nValue);
 
 }
-
-
-
 
 float CConfig::CalBaseRatio(BYTE cbCannoIndex, BYTE cbFishIndex)
 {
@@ -1192,10 +1247,10 @@ int CConfig::GetLevle(int nExperience)
 	}
 	return 0;
 }
-int CConfig::RandomCatchCycle()
-{
-	return Randomtime::s_cycle;
-}
+//int CConfig::RandomCatchCycle()
+//{
+//	return Randomtime::s_cycle;
+//}
 int CConfig::RpCycle()
 {
 	return ConvertFloatToInt(Con_Rp::s_cycle);
@@ -1203,6 +1258,28 @@ int CConfig::RpCycle()
 int CConfig::RpEffectCycle()
 {
 	return ConvertFloatToInt(Con_Rp::s_effecttime);
+}
+
+//充值影响捕获率
+int CConfig::RechargeTimeSec(DWORD dwRecharge)
+{
+	std::map<DWORD, Con_Recharge>::iterator rit = m_Recharge.find(dwRecharge);
+	if (rit != m_Recharge.end())
+	{
+		return rit->second.timesec;
+	}
+	return 0;
+}
+
+//充值影响捕获率
+float CConfig::RechargeRate(DWORD dwRecharge)
+{
+	std::map<DWORD, Con_Recharge>::iterator rit = m_Recharge.find(dwRecharge);
+	if (rit != m_Recharge.end())
+	{
+		return rit->second.ratio;
+	}
+	return 0.0f;
 }
 
 //rp影响概率
@@ -1302,6 +1379,11 @@ float CConfig::LuckRate(int nLuck)
 		}
 	}
 	return 0;
+}
+
+float CConfig::RandomTimeRate(int& TimeSec)
+{
+	return m_RandomTime.GetRandomTimeRatio(TimeSec);
 }
 
 float CConfig::PoolRate(int nPool)
@@ -1493,6 +1575,18 @@ void CConfig::AddStaticStockScore(int type, float score)
 //#ifdef _DEBUG
 //	std::cout << type << ":"<<Con_StockItem::s_stockscore[type] << endl;
 //#endif
+}
+
+void CConfig::AddTaxStockScore(int type, float score)
+{
+	if (type > MAX_TABLE_TYPE /*|| score <= 0*/)
+	{
+		return;
+	}
+	Con_StockItem::s_taxscore[type] += score;
+	//#ifdef _DEBUG
+	//	std::cout << type << ":"<<Con_StockItem::s_stockscore[type] << endl;
+	//#endif
 }
 
 int CConfig::RateRough(BYTE byIndex)

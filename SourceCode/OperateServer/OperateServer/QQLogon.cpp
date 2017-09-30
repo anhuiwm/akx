@@ -127,7 +127,7 @@ void QQLogon::OnHandleQQTokenResult(unsigned __int64 OnlyID, char* pData, DWORD 
 		ASSERT(false);
 		return;
 	}
-	LogInfoToFile("WmLogonError.txt", "QQ登陆 接收到数据 %s", pData);
+	LogInfoToFile("WmLogonError", "QQ登陆 接收到数据 %s", pData);
 	HashMap<UINT64, tagQQUser>::iterator Iter = m_UserMap.find(OnlyID);
 	if (Iter == m_UserMap.end())
 	{

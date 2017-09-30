@@ -354,7 +354,7 @@ bool CheckCatchFish(Fish *pFish, CatchData &catchData, FishManager *pMgr, Bullet
 		{
 			float catchChance = catchData.pSetting->CatchChance(catchData.playerID, catchData.pBullet->BulletID, (byte)catchData.pBullet->BulletType, (BYTE)pFish->FishType, catchData.pBullet->CollideCount, catchData.maxCatch, pFish->PackageType, catchData.pBullet->LockFishID!=0);
 			
-			LogInfoToFile("WmDmq.txt", " playerID=%d   FishType=%d  catchChance=%f", catchData.playerID, pFish->FishType, catchChance);
+			//LogInfoToFile("WmDmq.txt", " playerID=%d   FishType=%d  catchChance=%f", catchData.playerID, pFish->FishType, catchChance);
 			
 			++catchData.pBullet->CollideCount;
 			//计算概率
@@ -723,7 +723,7 @@ void FishCollider::Collide(CTableRoleManager *pm, BulletManager *pBulletMgr, Fis
 			pBullet->bombTime--;
 		}
 
-		if (cd.goldNum > 0 && pBullet->tableType != 100)
+		if (cd.goldNum > 0 && pBullet->tableType != 100)//100去掉机器人
 		{
 			float addStockScore = float(cd.goldNum);
 			pSetting->AddStaticStockScore(pBullet->tableType, addStockScore*-1);

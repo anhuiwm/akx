@@ -57,7 +57,9 @@ public:
 	bool QueryPool(WORD TableID, int64 & nPoolGold);
 	void QueryPool(BYTE TableTypeID, bool &bopen, int64&nPoolGold);
 	std::list<DWORD> GetBlackList();
-	bool SetBlackList(DWORD *pid,BYTE byCount);
+	bool SetBlackList(DWORD *pid, BYTE byCount);
+	bool SetBlackList(DWORD UserID);
+	bool UnSetBlackList(DWORD UserID);
 	bool Isabhor(DWORD dwUserid);
 
 	//bool reloadTableConfig()
@@ -82,7 +84,7 @@ private:
 
 	CConfig                     *m_pGameConfig;
 
-	CFishTimer                  m_TimerRanomCatch;
+	//CFishTimer                  m_TimerRanomCatch;
 	CFishTimer                  m_TimerRp;
 	CFishTimer                  m_TimerGameTime;
 	CFishTimer                  m_TimerRpAdd;

@@ -31,6 +31,7 @@ public:
 	virtual ~FishServer();
 
 	bool InitServer(int Index);
+	void InitDir();
 	void OnLoadFinish();
 	bool MainUpdate();
 	bool OnDestroy();

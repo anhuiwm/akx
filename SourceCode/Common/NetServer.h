@@ -144,7 +144,7 @@ public:
 	//返回CONNECT_CHECK_OK表示允许;
 	//返回CONNECT_CHECK_FAILED表示不允许;
 	//返回>0表示不允许，并将pData中的数据发送给客户端。
-	virtual uint CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize,char* resData=null) = 0;
+	virtual uint CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize) = 0;
 	//新的客户端加入，以及初始接收到的连接数据。
 	virtual bool NewClient(BYTE SeverID, ServerClientData *pClient, void *pData, uint recvSize) = 0;
 	//客户端断开连接及断开连接的类型。GetRemoveTypeString(rt)获取字符串描述。

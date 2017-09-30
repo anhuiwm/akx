@@ -360,6 +360,8 @@ bool RoleMailManager::OnGetUserAllMailItem(BYTE type)
 	}
 	//从邮件里获取物品
 	std::list<tagRoleMail*>::iterator Iter = m_RoleMailVec.begin();
+	std::map<WORD, DWORD> mapReward;
+	std::map<WORD, DWORD> mapItem;
 	for (; Iter != m_RoleMailVec.end(); ++Iter)
 	{
 		if (type == 0)//系统邮件
@@ -381,19 +383,53 @@ bool RoleMailManager::OnGetUserAllMailItem(BYTE type)
 		{
 			if ((*Iter)->SrcUserID != 0)//好友邮件表示ItemID
 			{
-				tagItemOnce pOnce;
-				pOnce.ItemID = (*Iter)->RewardID;
-				pOnce.ItemSum = (*Iter)->RewardSum;
-				pOnce.LastMin = 0;
-				m_pUser->GetItemManager().OnAddUserItem(pOnce);
+				auto itm = mapItem.find((*Iter)->RewardID);
+				if (itm == mapItem.end())
+				{
+					mapItem.insert(make_pair((*Iter)->RewardID, (*Iter)->RewardSum));
+				}
+				else
+				{
+					itm->second += (*Iter)->RewardSum;
+				}
+
+				//tagItemOnce pOnce;
+				//pOnce.ItemID = (*Iter)->RewardID;
+				//pOnce.ItemSum = (*Iter)->RewardSum;
+				//pOnce.LastMin = 0;
+				//m_pUser->GetItemManager().OnAddUserItem(pOnce);
 			}
-			else//好友邮件表示RewardID
+			else//系统邮件表示RewardID
 			{
-				m_pUser->OnAddRoleRewardByRewardID((*Iter)->RewardID, TEXT("领取邮件物品记录"), (*Iter)->RewardSum);
+				auto itm = mapReward.find((*Iter)->RewardID);
+				if (itm == mapReward.end())
+				{
+					mapReward.insert(make_pair((*Iter)->RewardID, (*Iter)->RewardSum));
+				}
+				else
+				{
+					itm->second += (*Iter)->RewardSum;
+				}
+
+				//m_pUser->OnAddRoleRewardByRewardID((*Iter)->RewardID, TEXT("领取邮件物品记录"), (*Iter)->RewardSum);
 			}
 		}
 	}
 
+	for (auto& mem : mapItem)
+	{
+
+		tagItemOnce pOnce;
+		pOnce.ItemID = mem.first;
+		pOnce.ItemSum = mem.second;
+		pOnce.LastMin = 0;
+		m_pUser->GetItemManager().OnAddUserItem(pOnce);
+	}
+
+	for (auto& mem : mapReward)
+	{
+		m_pUser->OnAddRoleRewardByRewardID(mem.first, TEXT("领取邮件物品记录"), mem.second);
+	}
 	OnDelUserAllMail(type);
 	LC_Cmd_GetAllMailItem msgClient;
 	SetMsgInfo(msgClient, GetMsgType(Main_Mail, LC_GetAllMailItem), sizeof(LC_Cmd_GetMailItem));
@@ -436,7 +472,7 @@ bool RoleMailManager::OnGetUserMailItem(DWORD MailID)//邮件领取奖励
 				pOnce.LastMin = 0;
 				m_pUser->GetItemManager().OnAddUserItem(pOnce);
 			}
-			else//好友邮件表示RewardID
+			else//非好友邮件表示RewardID
 			{
 				m_pUser->OnAddRoleRewardByRewardID((*Iter)->RewardID, TEXT("领取邮件物品记录"), (*Iter)->RewardSum);
 			}

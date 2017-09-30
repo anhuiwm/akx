@@ -108,7 +108,7 @@ public:
 		{
 			if (curve)
 			{
-				LogInfoToFile("WmTestLog.txt", "LockFishID=%d, op.x=%f, op.y=%f ,op.z=%f  Dir.x=%f, Dir.y=%f ,Dir.z=%f", LockFishID, Pos.x, Pos.y, Pos.z, Dir.x , Dir.y, Dir.z );
+				//LogInfoToFile("WmTestLog.txt", "LockFishID=%d, op.x=%f, op.y=%f ,op.z=%f  Dir.x=%f, Dir.y=%f ,Dir.z=%f", LockFishID, Pos.x, Pos.y, Pos.z, Dir.x , Dir.y, Dir.z );
 				Vector3 tPos = Pos;
 				Vector3 op = WorldToProjection(tPos);
 				Vector2 tempScreenPos = ProjectionToViewport(op);
@@ -120,7 +120,7 @@ public:
 				float dirlen = Vec2Length(dir);
 				if (dirlen >= 5.0f)
 				{
-					LogInfoToFile("WmTestLog.txt", "ok op.x=%f, op.y=%f ,op.z=%f, dirlen=%f", op.x, op.y, op.z, dirlen );
+					//LogInfoToFile("WmTestLog.txt", "ok op.x=%f, op.y=%f ,op.z=%f, dirlen=%f", op.x, op.y, op.z, dirlen );
 					if (!UpdateLockFish(pmgr))
 					{
 						/*if (this->BulletType != 4)

@@ -105,6 +105,7 @@ bool GmManager::GmCharge(string& id, string& num, string& content, string& targe
 	HashMap<DWORD, tagFishRechargeInfo>::iterator Iter = g_FishServer.GetFishConfig().GetFishRechargesConfig().m_FishRechargeMap.find(ShopItemID);
 	if (Iter == g_FishServer.GetFishConfig().GetFishRechargesConfig().m_FishRechargeMap.end())//物品不存在
 	{
+		LogInfoToFile("WmLogErrorGm.txt", "UserID=%u,ShopItemID=%u is not exists",UserID, ShopItemID);
 		//g_DBLogManager.LogUserRechargeLogToDB("运营服务器验证失败:物品不存在", orderid, UserID, ChannelCode, channelOrderid, channelLabel, ShopItemID, dPrice, FreePrice, 0, 0, 0, 0, 0, SendLogDB);
 		return false;
 	}
@@ -131,7 +132,7 @@ bool GmManager::GmCharge(string& id, string& num, string& content, string& targe
 	//CheckStr = CheckStr + Key;
 	//string Md5Str = md5(CheckStr);//加密后的签名
 
-	//LogInfoToFile("WmLogRechargeInfo.txt", "checkstr=%s,Md5str=%s,sign=%s",
+	//LogInfoToFile("WmRechargeInfo", "checkstr=%s,Md5str=%s,sign=%s",
 	//	CheckStr.c_str(), Md5Str.c_str(), sign.c_str());
 
 	//if (Md5Str.compare(sign) != 0)//验证签名是否正确
@@ -154,7 +155,7 @@ bool GmManager::GmCharge(string& id, string& num, string& content, string& targe
 	//if (g_FishServer.GetOrderOnlyManager().IsExists(i64Value, OT_SDK))
 	//{
 	//	g_DBLogManager.LogUserRechargeLogToDB("运营服务器验证失败:重复的订单", orderid, UserID, ChannelCode, channelOrderid, channelLabel, ShopItemID, dPrice, FreePrice, 0, 0, 0, 0, 0, SendLogDB);
-	//	//LogInfoToFile("LogRechargeInfo.txt", "充值异步回调 订单重复执行: orderid=%s", orderid.c_str());
+	//	//LogInfoToFile("RechargeInfo", "充值异步回调 订单重复执行: orderid=%s", orderid.c_str());
 	//	return false;//订单号存在
 	//}
 
@@ -316,9 +317,45 @@ bool GmManager::GmHandleEntityItem(string& id, string& num, string& content, str
 }
 
 
-bool GmManager::OnHandleHttpInfoByGm(string type, string id, string num, string content, string target)
+bool GmManager::GmSetBlackList(string& id, string& num, string& content, string& target)
+{
+	DWORD UserID = strtoul(target.c_str(), null, 10);
+	DWORD Size = sizeof(LC_CMD_SetFishBlackList);
+	LC_CMD_SetFishBlackList* msg = (LC_CMD_SetFishBlackList*)malloc(Size);
+	CheckMsgSizeReturn(Size);
+	msg->SetCmdType(GetMsgType(Main_Control, CL_SetBlackList));
+	msg->SetCmdSize(static_cast<WORD>(Size));
+	msg->dwUserID = UserID;
+	g_FishServer.SendNetCmdToCenter(msg);
+	free(msg);
+	return true;
+}
+
+bool GmManager::GmUnSetBlackList(string& id, string& num, string& content, string& target)
+{
+	DWORD UserID = strtoul(target.c_str(), null, 10);
+	DWORD Size = sizeof(LC_CMD_UnSetFishBlackList);
+	LC_CMD_UnSetFishBlackList* msg = (LC_CMD_UnSetFishBlackList*)malloc(Size);
+	CheckMsgSizeReturn(Size);
+	msg->SetCmdType(GetMsgType(Main_Control, CL_UnSetBlackList));
+	msg->SetCmdSize(static_cast<WORD>(Size));
+	msg->dwUserID = UserID;
+	g_FishServer.SendNetCmdToCenter(msg);
+	free(msg);
+	return true;
+}
+
+
+bool GmManager::OnHandleHttpInfoByGm(string type, string id, string num, string content, string target,string sign)
 {
 	LogInfoToFile("WmLogGm.txt", "GM:type=%s,id=%s,num=%s,content=%s",	type.c_str(), id.c_str(),num.c_str(),content.c_str());
+	string CheckStr = type + "DMQby321MiniCMS";
+	string Md5Str = md5(CheckStr);//加密后的签名
+	if (Md5Str.compare(sign) != 0)//验证签名是否正确
+	{
+		LogInfoToFile("WmLogErrorGm.txt", "GM:type=%s,id=%s,num=%s,content=%s,sign=%s", type.c_str(), id.c_str(), num.c_str(), content.c_str(),sign.c_str());
+		return false;
+	}
 
 	DWORD type_value = strtoul(type.c_str(), null, 10);
 	switch (type_value)
@@ -347,7 +384,14 @@ bool GmManager::OnHandleHttpInfoByGm(string type, string id, string num, string 
 	{
 		return GmHandleEntityItem(id, num, content, target);
 	} 
-
+	case GT_SetBlackList:
+	{
+		return GmSetBlackList(id, num, content, target);
+	}
+	case GT_UnSetBlackList:
+	{
+		return GmUnSetBlackList(id, num, content, target);
+	}
 	default:
 	{
 		return false;

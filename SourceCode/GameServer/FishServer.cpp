@@ -5,6 +5,8 @@
 #include "..\CommonFile\ip.h"
 #include "..\CommonFile\DBLogManager.h"
 #include<list>
+#include<direct.h>
+#include<io.h>
 FishServer g_FishServer;
 void SendLogDB(NetCmd* pCmd)
 {
@@ -52,8 +54,37 @@ void FishServer::ShowInfoToWin(const char *pcStr, ...)
 	SAFE_DELETE_ARR(pBuffer);
 	va_end(var);
 }
+void FishServer::InitDir()
+{
+	string dir = "./Log";
+	if (access(dir.c_str(), 0) == -1)
+	{
+#ifdef WIN32  
+	    mkdir(dir.c_str());
+#endif  
+#ifdef linux   
+		mkdir(dir.c_str(), 0777);
+#endif  
+	}
+
+
+	dir = "./xml";
+	if (access(dir.c_str(), 0) == -1)
+	{
+		mkdir(dir.c_str());
+	}
+
+
+	//dir = "D:/FishFTP/xml";
+	//if (access(dir.c_str(), 0) == -1)
+	//{
+	//	mkdir(dir.c_str());
+	//}
+
+}
 bool FishServer::InitServer(int Index)
 {
+	InitDir();
 	m_pDump.OnInit();
 	//1.读取配置文件 服务器配置的配置文件
 	if (!g_FishServerConfig.LoadServerConfigFile())
@@ -63,6 +94,8 @@ bool FishServer::InitServer(int Index)
 	}
 
 	m_GameNetworkID = ConvertIntToBYTE(Index);
+	g_ServerID = m_GameNetworkID;
+
 	GameServerConfig* pGameConfig = g_FishServerConfig.GetGameServerConfig(m_GameNetworkID);
 	if (!pGameConfig)
 	{
@@ -146,15 +179,15 @@ bool FishServer::InitServer(int Index)
 				break;
 		}
 	}
-	//if (!ConnectMiniGame())
-	//{
-	//	while (true)
-	//	{
-	//		Sleep(5);
-	//		if (ConnectMiniGame())
-	//			break;
-	//	}
-	//}
+	if (!ConnectMiniGame())
+	{
+		while (true)
+		{
+			Sleep(5);
+			if (ConnectMiniGame())
+				break;
+		}
+	}
 	if (!ConnectClient())
 	{
 		ASSERT(false);
@@ -511,7 +544,7 @@ bool FishServer::ConnectClient()
 	
 	return true;
 }
-uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize, char* resData)
+uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize)
 {
 	//中央服务器只有在FTP 和 DB都连接成功后才工作
 	bool IsNeed = m_DBTcp.IsConnected() && m_CenterTcp.IsConnected() && m_OperatorTcp.IsConnected() && m_DBSaveTcp.IsConnected() & m_DBLogTcp.IsConnected() && m_FtpTcp.IsConnected();
@@ -1898,6 +1931,19 @@ bool FishServer::HandleCenterMsg(NetCmd* pCmd)
 			    	return true;
 			    }
 				break;
+
+			case CL_SetBlackList:
+			    {
+			    	m_TableManager.SetBlackList(((LC_CMD_SetFishBlackList*)pCmd)->dwUserID);
+			    	return  true;
+			    }
+				break;
+			case CL_UnSetBlackList://
+			    {
+			    	m_TableManager.UnSetBlackList(((LC_CMD_UnSetFishBlackList*)pCmd)->dwUserID);
+			    	return  true;
+			    }
+				break;
 			//case CL_FreezeAccount:
 			//	{
 			//		CL_Cmd_FreezeAccount* pMsg = (CL_Cmd_FreezeAccount*)pCmd;
@@ -1917,7 +1963,7 @@ bool FishServer::HandleCenterMsg(NetCmd* pCmd)
 			//	}
 			//	break;
 			}
-			ASSERT(false);
+			//ASSERT(false);
 			return false;
 		}
 	case Main_Operate:
@@ -2532,7 +2578,7 @@ void FishServer::UpdateByMin(DWORD dwTimer)//按分钟进行更新 不受中央服务器控制
 	{
 		for (BYTE i = 0; i < MAX_TABLE_TYPE; i++)
 		{
-			g_DBLogManager.LogStockScoreToDB(WORD(m_GameNetworkID), i, INT64(Con_StockItem::s_stockscore[i]), SendLogDB);
+			g_DBLogManager.LogStockScoreToDB(WORD(m_GameNetworkID), i, INT64(Con_StockItem::s_stockscore[i]), INT64(Con_StockItem::s_taxscore[i]), SendLogDB);
 		}
 	}
 }
@@ -2615,7 +2661,7 @@ bool FishServer::OnHandClientLogonMsg(ServerClientData* pClient, NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt",TEXT("客户端唯一ID错误 连接GameServer失败 玩家ID:%d"),pMsg->dwUserID);
+				LogInfoToFile("WmLogonError",TEXT("客户端唯一ID错误 连接GameServer失败 玩家ID:%d"),pMsg->dwUserID);
 
 				ASSERT(false);
 				return true;
@@ -2632,7 +2678,7 @@ bool FishServer::OnHandClientLogonMsg(ServerClientData* pClient, NetCmd* pCmd)
 				LogInfoToFile("WmGmLogon.txt", "gm CL_Cmd_AccountOnlyID::userID=%d IP=%lld", pMsg->dwUserID, pClient->IP);
 
 			}
-			LogInfoToFile("WmLogon.txt", "CL_Cmd_AccountOnlyID::userID=%d",pMsg->dwUserID);
+			LogInfoToFile("WmLogon", "CL_Cmd_AccountOnlyID::userID=%d",pMsg->dwUserID);
 
 			//表示玩家正式登陆了 我们刷新下玩家的统计数据
 			DBR_Cmd_SetRoleClientInfo msgDBSave;
@@ -7056,6 +7102,21 @@ bool FishServer::OnHandleTCPNetworkOnlineReward(ServerClientData* pClient, NetCm
 			return true;
 		}
 		break;
+		case CL_OnlineSec:
+		{
+			//CL_Cmd_GetOnlineSec* pMsg = (CL_Cmd_GetOnlineSec*)pCmd;
+			//if (!pMsg)
+			//{
+			//	ASSERT(false);
+			//	return false;
+			//}
+			LC_Cmd_GetOnlineSec msg;
+			SetMsgInfo(msg, GetMsgType(Main_OnlineReward, LC_OnlineSec), sizeof(LC_Cmd_GetOnlineSec));
+			msg.OnlineSec = pRole->GetRoleOnlineSec();
+			pRole->SendDataToClient(&msg);
+			return true;
+		}
+		break;
 	}
 	return true;
 }
@@ -8537,17 +8598,31 @@ bool FishServer::HandleControlMsg(NetCmd* pCmd)
 			}
 			case CL_SetBlackList://
 			{
-									 BYTE nCount = (pCmd->GetCmdSize() - sizeof(LC_CMD_SetFishBlackList)) / sizeof(DWORD);
-									 m_TableManager.SetBlackList(((LC_CMD_SetFishBlackList*)pCmd)->dwUserID + 1, nCount);
+									 //BYTE nCount = (pCmd->GetCmdSize() - sizeof(LC_CMD_SetFishBlackList)) / sizeof(DWORD);
+									 m_TableManager.SetBlackList(((LC_CMD_SetFishBlackList*)pCmd)->dwUserID);
 
-									 LC_CMD_SetFishBlackListResult result;
-									 result.SetCmdSize(sizeof(result));
-									 result.SetCmdType((Main_Control << 8) | LC_SetBlackListResult);
-									 result.ClientID = ((LC_CMD_SetFishBlackList*)pCmd)->ClientID;
-									 result.byServerid = m_GameNetworkID;
-									 result.byCount = nCount;
-									 SendNetCmdToControl(&result);
+									 //LC_CMD_SetFishBlackListResult result;
+									 //result.SetCmdSize(sizeof(result));
+									 //result.SetCmdType((Main_Control << 8) | LC_SetBlackListResult);
+									 //result.ClientID = ((LC_CMD_SetFishBlackList*)pCmd)->ClientID;
+									 //result.byServerid = m_GameNetworkID;
+									 //result.byCount = 1;
+									 //SendNetCmdToControl(&result);
 									 return  true;
+			}
+			case CL_UnSetBlackList://
+			{
+				//BYTE nCount = (pCmd->GetCmdSize() - sizeof(LC_CMD_SetFishBlackList)) / sizeof(DWORD);
+				m_TableManager.UnSetBlackList(((LC_CMD_UnSetFishBlackList*)pCmd)->dwUserID);
+
+				//LC_CMD_SetFishBlackListResult result;
+				//result.SetCmdSize(sizeof(result));
+				//result.SetCmdType((Main_Control << 8) | LC_SetBlackListResult);
+				//result.ClientID = ((LC_CMD_SetFishBlackList*)pCmd)->ClientID;
+				//result.byServerid = m_GameNetworkID;
+				//result.byCount = 1;
+				//SendNetCmdToControl(&result);
+				return  true;
 			}
 				break;
 			}

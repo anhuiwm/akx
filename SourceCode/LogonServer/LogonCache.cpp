@@ -75,7 +75,7 @@ bool LogonCache::IsExistsAccount(const TCHAR* AccountName)
 		return false;
 	else
 	{
-		Log(L"存在相同的账号名:%s", AccountName);
+		LogInfoToFile("WmLogonError", TEXT("存在相同的账号名:%s"), AccountName);
 		return true;
 	}
 }
@@ -90,16 +90,26 @@ bool LogonCache::CheckAccountData(const TCHAR* AccountName, DWORD PasswordCrc1, 
 		UserID = 0;
 		return false;
 	}
-	if (Iter->second->PasswordCrc1 == PasswordCrc1 && Iter->second->PasswordCrc2 == PasswordCrc2 && Iter->second->PasswordCrc3 == PasswordCrc3)
+	if (Iter->second && Iter->second->PasswordCrc1 == PasswordCrc1 && Iter->second->PasswordCrc2 == PasswordCrc2 && Iter->second->PasswordCrc3 == PasswordCrc3)
 	{
 		time_t pNow = time(null);
-		IsFreeze = (Iter->second->IsFreeze && Iter->second->FreezeEndTime > pNow);
+		IsFreeze = false;//(Iter->second->IsFreeze && Iter->second->FreezeEndTime > pNow);
 		UserID = Iter->second->dwUserID;
 		FreezeEndTime = Iter->second->FreezeEndTime;
+
+		if (Iter->second->IsFreeze)
+		{
+			LogInfoToFile("WmLogonError", TEXT("UserID=%u FreezeEndTime=%u pNow=%lld "), UserID, Iter->second->FreezeEndTime, pNow);
+		}
+
 		return true;
 	}
 	else
 	{
+		if (Iter->second == NULL)
+		{
+			LogInfoToFile("WmLogonError", TEXT(" NULL AccountCrc=%u size=%u"), AccountCrc, m_AccountMap.size());
+		}
 		FreezeEndTime = 0;
 		IsFreeze = false;
 		UserID = 0;
@@ -237,6 +247,8 @@ void LogonCache::OnAddAccountInfo(DWORD dwUserID, const TCHAR* AccountName, DWOR
 	pInfo->PasswordCrc1 = Pass1;
 	pInfo->PasswordCrc2 = Pass2;
 	pInfo->PasswordCrc3 = Pass3;
+	pInfo->IsFreeze = false;
+	pInfo->FreezeEndTime = 31507200;
 	m_AccountMap.insert(HashMap<DWORD, AccountCacheInfo*>::value_type(AccountCrc, pInfo));
 	m_UserMap.insert(HashMap<DWORD, AccountCacheInfo*>::value_type(pInfo->dwUserID, pInfo));
 }
@@ -245,7 +257,7 @@ void LogonCache::OnDestroy()
 	HashMap<DWORD, AccountCacheInfo*>::iterator Iter = m_AccountMap.begin();
 	for (; Iter != m_AccountMap.end(); ++Iter)
 	{
-		delete Iter->second;
+		SAFE_DELETE(Iter->second);
 	}
 	m_AccountMap.clear();
 	m_UserMap.clear();

@@ -2,8 +2,8 @@
 #include "FishServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 
-const static char DBErrorSqlFileName[] = "WmLogSqlError.txt";
-const static char DBSqlFileName[] = "WmLogSql.txt";
+const static char DBErrorSqlFileName[] = "WmSqlErr";
+const static char DBSqlFileName[] = "WmSql";
 FishServer g_FishServer;
 struct Thread3Info
 {
@@ -54,7 +54,7 @@ bool FishServer::InitServer(BYTE DBNetworkID)
 		return false;
 	}
 	m_DBNetworkID = DBNetworkID;
-
+	g_ServerID = DBNetworkID;
 	SQLInitData pMySQl;
 	strncpy_s(pMySQl.IP, CountArray(pMySQl.IP), pDBConfig->MySQlIP, CountArray(pDBConfig->MySQlIP));
 	strncpy_s(pMySQl.DB, CountArray(pMySQl.DB), pDBConfig->MySQlDBName, CountArray(pDBConfig->MySQlDBName));
@@ -3216,7 +3216,7 @@ bool FishServer::OnHandleGetUserItem(BYTE Index, BYTE ClientID, NetCmd* pCmd)
 		ASSERT(false);
 	}
 
-	LogInfoToFile("WmItem.txt", SqlStr);
+	LogInfoToFile("WmItemSql", SqlStr);
 	return true;
 }
 bool FishServer::OnHandleAddUserItem(BYTE Index, BYTE ClientID, NetCmd* pCmd)
@@ -3234,7 +3234,7 @@ bool FishServer::OnHandleAddUserItem(BYTE Index, BYTE ClientID, NetCmd* pCmd)
 	{
 		if (pMsg->ItemInfo.LastMin == 0)//时间为0
 		{
-			LogInfoToFile("WmItemError.txt", "db time itemid=%u, itemsum=%u ,lastmin=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.LastMin);
+			LogInfoToFile("WmItemError", "db time itemid=%u, itemsum=%u ,lastmin=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.LastMin);
 			return true;
 		}
 		msg->ItemInfo.EndTime = time(NULL) + pMsg->ItemInfo.LastMin * pMsg->ItemInfo.ItemSum * 60;
@@ -3255,7 +3255,7 @@ bool FishServer::OnHandleAddUserItem(BYTE Index, BYTE ClientID, NetCmd* pCmd)
 	{
 		if (pMsg->ItemInfo.ItemSum == 0)//物品数量为0
 		{
-			LogInfoToFile("WmItemError.txt", "db no time itemid=%u, itemsum=%u ,lastmin=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.LastMin);
+			LogInfoToFile("WmItemError", "db no time itemid=%u, itemsum=%u ,lastmin=%u", pMsg->ItemInfo.ItemID, pMsg->ItemInfo.ItemSum, pMsg->ItemInfo.LastMin);
 			return true;
 		}
 		msg->ItemInfo.EndTime = 0;//存储过程根据此判断
@@ -3263,7 +3263,7 @@ bool FishServer::OnHandleAddUserItem(BYTE Index, BYTE ClientID, NetCmd* pCmd)
 
 	}
 
-	LogInfoToFile("WmItem.txt", SqlStr);
+	LogInfoToFile("WmItemSql", SqlStr);
 
 	if (m_Sql[Index].Select(SqlStr, 0, pTable1, true) && pTable1.Rows() == 1)
 	{
@@ -3286,7 +3286,7 @@ bool FishServer::OnHandleDelUserItem(BYTE Index, BYTE ClientID, NetCmd* pCmd)
 	SqlTable pTable1;
 	char SqlStr[MAXSQL_LENGTH] = { 0 };
 	sprintf_s(SqlStr, sizeof(SqlStr), "call FishDelItem('%u');", pMsg->ItemOnlyID);
-	LogInfoToFile("WmItem.txt", SqlStr);
+	LogInfoToFile("WmItemSql", SqlStr);
 	bool Result = (m_Sql[Index].Select(SqlStr, 0, pTable1, true) && pTable1.Rows() == 1 /*&& pTable1.GetUint(0, 0) == 1*/);
 	if (!Result)
 	{
@@ -3332,7 +3332,7 @@ bool FishServer::OnHandleChangeUserItem(BYTE Index, BYTE ClientID, NetCmd* pCmd)
 			ASSERT(false);
 		}
 	}
-	LogInfoToFile("WmItem.txt", SqlStr);
+	LogInfoToFile("WmItemSql", SqlStr);
 
 	return true;
 }
@@ -6191,7 +6191,7 @@ bool FishServer::OnHandleLogStockScore(BYTE Index, BYTE ClientID, NetCmd* pCmd)
 	DBR_Cmd_LogStockScore* pMsg = (DBR_Cmd_LogStockScore*)pCmd;
 	SqlTable pTable1;
 	char SqlStr[MAXSQL_LENGTH] = { 0 };
-	sprintf_s(SqlStr, sizeof(SqlStr), "update fishstocklog set fishstocklog.StockScore = %lld where fishstocklog.TableType = %u and fishstocklog.ServerID=%u",pMsg->StockScore,pMsg->TableType,pMsg->ServerID);
+	sprintf_s(SqlStr, sizeof(SqlStr), "update fishstocklog set fishstocklog.StockScore = %lld,fishstocklog.TaxScore = %lld where fishstocklog.TableType = %u and fishstocklog.ServerID=%u",pMsg->StockScore, pMsg->TaxScore, pMsg->TableType,pMsg->ServerID);
 
 	//sprintf_s(SqlStr, sizeof(SqlStr), "update fishstocklog set StockScore='%d' where TableType='%d' and ServerID='%d';",pMsg->StockScore,pMsg->TableType,pMsg->ServerID);
 	bool Result = (m_Sql[Index].RealExcute(SqlStr, strlen(SqlStr) /*&& pTable1.Rows() == 1*/ /*&& pTable1.GetUint(0, 0) == 1*/));
@@ -6667,7 +6667,7 @@ bool FishServer::OnHandleLogInfo(BYTE Index, BYTE ClientID, NetCmd* pCmd)
 
 	SqlTable pTable1;
 	char SqlStr[MAXSQL_LENGTH] = { 0 };
-	sprintf_s(SqlStr, sizeof(SqlStr), "call FishAddLogInfo('%u','%u','%d','%u','%s','%d-%d-%d %d:%d:%d');", pMsg->UserID, pMsg->Type, pMsg->TypeSum, pMsg->Param, DestInfo, pTime.wYear, pTime.wMonth, pTime.wDay, pTime.wHour, pTime.wMinute, pTime.wSecond);
+	sprintf_s(SqlStr, sizeof(SqlStr), "call FishAddLogInfo('%u','%u','%d','%u','%u','%s','%d-%d-%d %d:%d:%d');", pMsg->UserID, pMsg->Type, pMsg->TypeSum, pMsg->Param,pMsg->EndParam, DestInfo, pTime.wYear, pTime.wMonth, pTime.wDay, pTime.wHour, pTime.wMinute, pTime.wSecond);
 	free(Info);
 	free(DestInfo);
 

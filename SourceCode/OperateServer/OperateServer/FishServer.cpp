@@ -50,6 +50,7 @@ bool FishServer::InitServer()
 		return false;
 	}
 	m_OperateNetworkID = pOperateConfig->NetworkID;
+	g_ServerID = m_OperateNetworkID;
 	m_IOSPayManager.OnInit();
 	if (!ConnectControl())
 	{
@@ -461,7 +462,7 @@ void FishServer::Disconnect(BYTE ServerID, ServerClientData *pClient, RemoveType
 		break;
 	}
 }
-uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize, char* resData)
+uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize)
 {
 	//中央服务器只有在FTP 和 DB都连接成功后才工作
 	if (m_CenterTcp.IsConnected() && m_DBTcp.IsConnected())

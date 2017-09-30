@@ -2093,6 +2093,9 @@ bool FishConfig::LoadFishVipConfig(WHXmlNode* pFishConfig)
 	pTotalOnce.SendBronzeBulletNum = 0;
 	pTotalOnce.RewardID = 0;
 	pTotalOnce.SendItemNum = 0;
+	pTotalOnce.AddCatchFishRate = 0;
+	pTotalOnce.AddUseMedalSum = 0;
+
 	while (pFishVip)
 	{
 		tagVipOnce pCurrceyOnce;
@@ -2844,9 +2847,13 @@ bool FishConfig::LoadFishGameRobotConfig(WHXmlNode* pFishConfig)
 			DWORD RobotID = 0;
 			if (!pRobot->GetAttribute(TEXT("ID"), RobotID))
 				return false;
-			if (m_GameRobotConfig.RobotMap.count(RobotID) != 1)
+			if (m_GameRobotConfig.RobotMap.count(RobotID) != 1 && RobotID != 0)
 				return false;
-			m_GameRobotConfig.RobotIndexMap.insert(multimap<DWORD, DWORD>::value_type(Key, RobotID));
+			if (RobotID != 0)
+			{
+				m_GameRobotConfig.RobotIndexMap.insert(multimap<DWORD, DWORD>::value_type(Key, RobotID));
+			}
+
 			pRobot = pRobot->GetNextSignelNode();
 		}
 		pOnceTable = pOnceTable->GetNextSignelNode();

@@ -298,7 +298,7 @@ void PhonePayManager::OnQueryPhonePayOrder(UINT64 order_no)
 }
 void PhonePayManager::OnHandleHttpResult(string account_no, string face_price, string order_no, string order_time, string order_type, string partner_id, string pay_money, string profit, string sign_type, string status, string stream_id, string sign)
 {
-	LogInfoToFile("LogPhonePay.txt", "手机充值异步回调: account_no=%s,face_price=%s,order_no=%s,order_time=%s,order_type=%s,partner_id=%s,pay_money=%s,profit=%s,sign_type=%s,status=%s,stream_id=%s,sign=%s"
+	LogInfoToFile("LogPhonePay", "手机充值异步回调: account_no=%s,face_price=%s,order_no=%s,order_time=%s,order_type=%s,partner_id=%s,pay_money=%s,profit=%s,sign_type=%s,status=%s,stream_id=%s,sign=%s"
 		,account_no.c_str(), face_price.c_str(), order_no.c_str(), order_time.c_str(), order_type.c_str(), partner_id.c_str(), pay_money.c_str(), profit.c_str(), sign_type.c_str(), status.c_str(), stream_id.c_str(), sign.c_str());
 
 	unsigned __int64 orderID = _strtoui64(order_no.c_str(), null, 10);//字符串转UInt64

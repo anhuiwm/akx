@@ -108,14 +108,18 @@ void RoleGameData::OnHandleCatchFish(BYTE FishID)
 	}
 	m_pRole->SetRoleIsNeedSave();
 }
-void RoleGameData::OnHandleRoleGetGlobel(DWORD AddGlobel)
+void RoleGameData::OnHandleRoleGetGlobel(int AddGlobel)
 {
 	if (!m_pRole)
 	{
 		ASSERT(false);
 		return;
 	}
-	m_RoleGameData.RoleGetGlobelSum += AddGlobel;
+	if (!CheckChangeInt64Value(m_RoleGameData.RoleGetGlobelSum, AddGlobel))
+		return ;
+
+	if (AddGlobel > 0 && m_RoleGameData.RoleGetGlobelSum + AddGlobel >= g_FishServer.GetFishConfig().GetSystemConfig().MaxGobelSum)//金币到达上限了 无法添加金币
+		return ;
 	m_pRole->SetRoleIsNeedSave();
 }
 void RoleGameData::OnHandleRoleMonthReward(int RewardIndex)

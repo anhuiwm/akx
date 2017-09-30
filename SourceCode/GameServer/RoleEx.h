@@ -143,6 +143,7 @@ public:
 	void	ChangeRoleOnlineTimeByDay(bool States);
 	bool	ChangeRoleExChangeStates(DWORD States);
 	bool	ChangeRoleTotalRechargeSum(DWORD AddSum);
+    void 	ChangeRechargeRatioSum(DWORD AddSum);
 	bool    ChangeRoleNobilityPoint(DWORD AddSum);
 	bool    ChangeRoleCheck( bool bCheck);
 	bool    ChangeRoleDayTaskActiviness(BYTE AddSum,bool clear = false);
@@ -228,6 +229,8 @@ public:
 	//bool IsGm();
 	bool IsLogonGm();
 	bool IsChargeGm();
+	time_t GetLastRechargeRatioTime() { return m_LastRechargeRatioTime; }
+	DWORD  GetRechargeRatioSum() { return m_RechargeRatioSum; }
 private:
 	void OnHandleRoleVersionChange();
 	void ResetPerDay();
@@ -296,6 +299,8 @@ private:
 	WORD							m_PageExchangeEntity = 0;//实物兑换
 	WORD                            m_PageExchangeItem = 0;//道具兑换
 	WORD                            m_PageSendRecvItem = 0;//赠送领取记录
+	time_t                          m_LastRechargeRatioTime = 0;
+	DWORD                           m_RechargeRatioSum = 0;
 	//渠道数据
 	std::vector<TCHAR*>				m_ChannelUserInfo;
 };

@@ -393,13 +393,13 @@ bool CRole::CheckFire(BYTE &tableType, BYTE byLauncher, DWORD mul)
 
 	if (byLauncher != /*m_LauncherType*/GetLauncherType())
 	{
-		LogInfoToFile("WmErrorLog.txt", "%d大炮索引不对:%d,:%d", m_pRoleEx->GetRoleInfo().dwUserID, byLauncher, /*m_LauncherType*/GetLauncherType());
+		LogInfoToFile("WmBulletErr", "%d大炮索引不对:%d,:%d", m_pRoleEx->GetRoleInfo().dwUserID, byLauncher, /*m_LauncherType*/GetLauncherType());
 		return false;
 	}
 
 	if (!m_pRoleEx->GetRoleLauncherManager().IsCanUserLauncherByID(/*m_LauncherType*/GetLauncherType()))
 	{
-		LogInfoToFile("WmErrorLog.txt", "大炮未购买:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());
+		LogInfoToFile("WmBulletErr", "大炮未购买:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());
 		return false;
 	}
 
@@ -412,7 +412,7 @@ bool CRole::CheckFire(BYTE &tableType, BYTE byLauncher, DWORD mul)
 	{
 		if (timeGetTime() - m_dwLastFireTime < m_pConfig->SkillLauncherIntervalTime(SKILL_ACCELERATE) * 1000)//speed up
 		{
-			LogInfoToFile("WmErrorLog.txt", "大炮发射间隔:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());
+			LogInfoToFile("WmBulletErr", "大炮发射间隔:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());
 			return false;
 		}
 	}
@@ -420,14 +420,14 @@ bool CRole::CheckFire(BYTE &tableType, BYTE byLauncher, DWORD mul)
 	{
 		if (timeGetTime() - m_dwLastFireTime < m_pConfig->LauncherInterval(GetLauncherType()) * 1000)
 		{
-			LogInfoToFile("WmErrorLog.txt", "大炮发射间隔:%u, 炮台:%d  timeGetTime()=%d  m_dwLastFireTime=%d", m_pRoleEx->GetRoleInfo().dwUserID,GetLauncherType(), timeGetTime(), m_dwLastFireTime);
+			LogInfoToFile("WmBulletErr", "大炮发射间隔:%u, 炮台:%d  timeGetTime()=%d  m_dwLastFireTime=%d", m_pRoleEx->GetRoleInfo().dwUserID,GetLauncherType(), timeGetTime(), m_dwLastFireTime);
 			return false;
 		}
 	}
 	LauncherInfo&  launcher = m_vecLauncherInfo[/*m_LauncherType*/GetLauncherType()]; //暂时先屏蔽掉 xuda  后期开启
 	if (launcher.nEnergy >= m_pConfig->LaserThreshold(/*m_LauncherType*/GetLauncherType())*m_pConfig->BulletMultiple(m_nMultipleIndex))// *rate 
 	{
-		LogInfoToFile("WmErrorLog.txt", "大炮能量值已满:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());// wm todo
+		LogInfoToFile("WmBulletErr", "大炮能量值已满:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());// wm todo
 		return false;
 	}
 
@@ -438,7 +438,7 @@ bool CRole::CheckFire(BYTE &tableType, BYTE byLauncher, DWORD mul)
 	{
 		if (!m_pRoleEx->GetRoleMonth().OnChangeRoleMonthGlobel(nConsume*-1))
 		{
-			LogInfoToFile("WmErrorLog.txt", "大炮比赛币不够:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());
+			LogInfoToFile("WmBulletErr", "大炮比赛币不够:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());
 			return false;
 		}
 	}
@@ -446,7 +446,7 @@ bool CRole::CheckFire(BYTE &tableType, BYTE byLauncher, DWORD mul)
 	{
 		if (!m_pRoleEx->ChangeRoleGlobe(nConsume*-1, false))
 		{
-			LogInfoToFile("WmErrorLog.txt", "大炮金币不够:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());
+			LogInfoToFile("WmBulletErr", "大炮金币不够:%u, 炮台:%d", m_pRoleEx->GetRoleInfo().dwUserID, /*m_LauncherType*/GetLauncherType());
 			return false;
 		}
 		g_FishServer.GetTableManager()->OnChangeTableGlobel(GetTableID(), nConsume, TableRate());
@@ -468,8 +468,11 @@ bool CRole::CheckFire(BYTE &tableType, BYTE byLauncher, DWORD mul)
 		else
 		{
 			tableType = pTable->GetTableTypeID();
-			float addStockScore = nConsume*(1.0f - g_FishServer.GetTableManager()->GetGameConfig()->GetStockTax(tableType));
+			//float addStockScore = nConsume*(1.0f - g_FishServer.GetTableManager()->GetGameConfig()->GetStockTax(tableType));
+			float taxStockScore = nConsume*(g_FishServer.GetTableManager()->GetGameConfig()->GetStockTax(tableType));//扣税
+			float addStockScore = nConsume - taxStockScore;
 			g_FishServer.GetTableManager()->GetGameConfig()->AddStaticStockScore(pTable->GetTableTypeID(), addStockScore);
+			g_FishServer.GetTableManager()->GetGameConfig()->AddTaxStockScore(pTable->GetTableTypeID(), taxStockScore);
 		}
 	}
 	return true;
@@ -882,28 +885,51 @@ void CRole::OnChangeRateToIndex(byte RateIndex, bool& IsCanUse)
 	}
 	IsCanUse = GetRoleExInfo()->GetRoleRate().IsCanUseRateIndex(m_nMultipleIndex);
 }
-float CRole::RandTimeRate(float fmin, float fmax, BYTE byFishType)
+
+float CRole::RechargeRate()
 {
-	if (m_vecRandomByTime.size() == 0)
+	if (m_pRoleEx != nullptr && m_pConfig != nullptr)
 	{
-		m_vecRandomByTime.resize(m_pConfig->FishCount());
-	}
-	if (timeGetTime() - m_dwUpdateRandomtime > (DWORD)m_pConfig->RandomCatchCycle())
-	{
-		m_dwUpdateRandomtime = timeGetTime();
-	
-		int nLef = (int)(fmin * 100);
-		int Right = (int)(fmax * 100);
-		if (nLef <Right)
+		if (m_pRoleEx->GetLastRechargeRatioTime() != 0 && m_pRoleEx->GetLastRechargeRatioTime() > time(0))
 		{
-			for (size_t i = 0; i < m_vecRandomByTime.size(); i++)
-			{
-				m_vecRandomByTime[i] = nLef + rand() % (Right - nLef);
-			}	
+			return m_pConfig->RechargeRate(m_pRoleEx->GetRechargeRatioSum());
 		}
 	}
-	return (float)m_vecRandomByTime[byFishType]/100.f;
+	return 0.0f;
 }
+
+float CRole::RandTimeRate()
+{
+	if (timeGetTime() > m_dwUpdateRandomtime && m_pConfig)
+	{
+		int TimeSec = 0;
+		m_RandomByTime = m_pConfig->RandomTimeRate(TimeSec);
+		m_dwUpdateRandomtime = timeGetTime()+TimeSec*1000;
+	}
+	return m_RandomByTime;
+}
+//float CRole::RandTimeRate(float fmin, float fmax, BYTE byFishType)
+//{
+//	if (m_vecRandomByTime.size() == 0)
+//	{
+//		m_vecRandomByTime.resize(m_pConfig->FishCount());
+//	}
+//	if (timeGetTime() - m_dwUpdateRandomtime > (DWORD)m_pConfig->RandomCatchCycle())
+//	{
+//		m_dwUpdateRandomtime = timeGetTime();
+//	
+//		int nLef = (int)(fmin * 100);
+//		int Right = (int)(fmax * 100);
+//		if (nLef <Right)
+//		{
+//			for (size_t i = 0; i < m_vecRandomByTime.size(); i++)
+//			{
+//				m_vecRandomByTime[i] = nLef + rand() % (Right - nLef);
+//			}	
+//		}
+//	}
+//	return (float)m_vecRandomByTime[byFishType]/100.f;
+//}
 void  CRole::SetLockEndTime()
 { 
 	DWORD NowTime = timeGetTime();

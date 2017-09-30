@@ -43,7 +43,7 @@ void ChannelLogonManager::OnHandleLogonInfo(ServerClientData* pClient, LO_Cmd_Ch
 #else
 		swprintf_s(PostUrl, CountArray(PostUrl), TEXT("login/check.html?sdk=%s&app=%s&uin=%s&sess=%s"), pVec[0], pVec[1], pVec[2], pVec[3]);
 #endif	
-	LogInfoToFile("WmOpLogon.txt", TEXT("request::PostUrl=%s"), PostUrl);
+	LogInfoToFile("WmOpLogon", TEXT("request::PostUrl=%s"), PostUrl);
 
 	//swprintf_s(PostUrl, CountArray(PostUrl), TEXT("game_agent/checkLogin?userId=%s&channel=%s&token=%s&productCode=%s"), pVec[0], pVec[4], pVec[6], pVec[3]);
 	UINT Count = 0;
@@ -66,7 +66,7 @@ void ChannelLogonManager::OnHandleLogonInfo(ServerClientData* pClient, LO_Cmd_Ch
 	{
 		free(Iter->second.pMsg);
 		m_RoleLogonMap.erase(Iter);
-		LogInfoToFile("WmLogonError.txt", TEXT("客户端渠道登陆 顶掉以前的渠道数据"));
+		LogInfoToFile("WmLogonError", TEXT("客户端渠道登陆 顶掉以前的渠道数据"));
 	}
 	LogonTempInfo pInfo;
 	pInfo.pMsg = pNewChannelInfo;
@@ -81,7 +81,7 @@ void ChannelLogonManager::OnHandleLogonInfo(ServerClientData* pClient, LO_Cmd_Ch
 	}
 	if (g_FishServerConfig.GetIsOperateTest())
 	{
-		LogInfoToFile("WmOpLogon.txt", "ceshi");
+		LogInfoToFile("WmOpLogon", "ceshi");
 		OnHandleLogonResult(i64Value, "0", strlen("0"));
 		delete pID;
 	}
@@ -101,7 +101,7 @@ void ChannelLogonManager::OnHandleLogonResult(unsigned __int64 OnlyID, char* pDa
 {
 	if (!pData)
 	{
-		LogInfoToFile("WmLogonError.txt", TEXT("客户端渠道登陆 返回数据为空"));
+		LogInfoToFile("WmLogonError", TEXT("客户端渠道登陆 返回数据为空"));
 		ASSERT(false);
 		return;
 	}
@@ -112,7 +112,7 @@ void ChannelLogonManager::OnHandleLogonResult(unsigned __int64 OnlyID, char* pDa
 		SYSTEMTIME pTime;
 		GetLocalTime(&pTime);
 		//g_FishServer.ShowInfoToWin("玩家渠道登陆数据不存在  Time: %02d:%02d:%02d", pTime.wHour, pTime.wMinute, pTime.wSecond);
-		LogInfoToFile("WmOpLogon.txt", "客户端渠道登陆 渠道数据不存在!!!");
+		LogInfoToFile("WmOpLogon", "客户端渠道登陆 渠道数据不存在!!!");
 		return;
 	}
 	ServerClientData* pClient = g_FishServer.GetUserClientDataByIndex(static_cast<BYTE>(Iter->second.ClientID));
@@ -120,7 +120,7 @@ void ChannelLogonManager::OnHandleLogonResult(unsigned __int64 OnlyID, char* pDa
 	{
 		free(Iter->second.pMsg);
 		m_RoleLogonMap.erase(Iter);
-		LogInfoToFile("WmOpLogon.txt", "客户端渠道登陆 客户端不存在!");
+		LogInfoToFile("WmOpLogon", "客户端渠道登陆 客户端不存在!");
 		//ASSERT(false);
 		return;
 	}
@@ -141,7 +141,7 @@ void ChannelLogonManager::OnHandleLogonResult(unsigned __int64 OnlyID, char* pDa
 	
 	if (Length == 0)
 	{
-		LogInfoToFile("WmOpLogon.txt", "客户端渠道登陆 返回长度为0");
+		LogInfoToFile("WmOpLogon", "客户端渠道登陆 返回长度为0");
 		msg->Result = false;
 		g_FishServer.SendNetCmdToClient(pClient, msg);
 		free(msg);
@@ -164,7 +164,7 @@ void ChannelLogonManager::OnHandleLogonResult(unsigned __int64 OnlyID, char* pDa
 	//}
 	else
 	{
-		LogInfoToFile("WmOpLogon.txt", "客户端渠道登陆 渠道返回数据异常:%s",pData);
+		LogInfoToFile("WmOpLogon", "客户端渠道登陆 渠道返回数据异常:%s",pData);
 		ASSERT(false);
 		msg->Result = false;
 		g_FishServer.SendNetCmdToClient(pClient, msg);
@@ -176,7 +176,7 @@ void ChannelLogonManager::OnDestroy()
 {
 	if (m_RoleLogonMap.empty())
 		return;
-	LogInfoToFile("WmOpLogon.txt", "客户端渠道登陆 渠道服务器关闭 销毁全部登陆数据");
+	LogInfoToFile("WmOpLogon", "客户端渠道登陆 渠道服务器关闭 销毁全部登陆数据");
 	HashMap < unsigned __int64, LogonTempInfo>::iterator Iter = m_RoleLogonMap.begin();
 	for (; Iter != m_RoleLogonMap.end(); ++Iter)
 	{

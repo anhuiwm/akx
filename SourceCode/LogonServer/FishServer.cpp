@@ -154,6 +154,7 @@ bool FishServer::InitServer(DWORD LogonID)
 	//初始化登陆服务器 我们进行设置 
 	//1.从配置文件里 加载 Logon 的 一些配置 我们想要进行配置 FishServer.xml 里进行读取 对外监听端口 对内监听端口 数据库的端口是多少 等 想要进行处理
 	m_LogonConfigID = ConvertDWORDToBYTE(LogonID);
+	g_ServerID = m_LogonConfigID;
 	if (!g_FishServerConfig.LoadServerConfigFile())
 	{
 		ShowInfoToWin("服务器配置文件读取失败");
@@ -1153,6 +1154,8 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 {
 	if (!pClient || !pCmd)
 		return;
+	if (pCmd->CmdType != Main_Logon)
+		return;
 
 	if (1)
 	{
@@ -1219,7 +1222,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt",TEXT("客户端版本错误 普通登陆失败1 %u, %u  vs %u, %u"), pMsg->VersionID, pMsg->PathCrc, m_FishConfig.GetSystemConfig().VersionID, m_FishConfig.GetSystemConfig().PathCrc);
+				LogInfoToFile("WmLogonError",TEXT("客户端版本错误 普通登陆失败1 %u, %u  vs %u, %u"), pMsg->VersionID, pMsg->PathCrc, m_FishConfig.GetSystemConfig().VersionID, m_FishConfig.GetSystemConfig().PathCrc);
 
 				return;
 			}
@@ -1242,7 +1245,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 				m_DelSocketVec.push_back(pDel);
 
 
-				LogInfoToFile("WmLogonError.txt",TEXT("客户端账号名称错误 普通登陆失败2 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+				LogInfoToFile("WmLogonError",TEXT("客户端账号名称错误 普通登陆失败2 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
 
 				return;
 			}
@@ -1270,6 +1273,8 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 				pData.AccountInfo.PasswordCrc1 = pMsg->PasswordCrc1;
 				pData.AccountInfo.PasswordCrc2 = pMsg->PasswordCrc2;
 				pData.AccountInfo.PasswordCrc3 = pMsg->PasswordCrc3;
+				pData.AccountInfo.IsFreeze = false;
+				pData.AccountInfo.FreezeEndTime = 31507200;
 				m_LogonCacheManager.OnAddTempAccountInfo(pData);
 			}
 			else
@@ -1294,7 +1299,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 					pDel.SocketID = pClient->OutsideExtraData;
 					m_DelSocketVec.push_back(pDel);
 
-					LogInfoToFile("WmLogonError.txt", TEXT("客户端账号不存在或者密码错误 普通登陆失败3 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+					LogInfoToFile("WmLogonError", TEXT("客户端账号不存在或者密码错误 普通登陆失败3 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
 				}
 				else
 				{
@@ -1304,12 +1309,12 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 						SetMsgInfo(msg, GetMsgType(Main_Logon, LC_AccountIsFreeze), sizeof(LC_Cmd_AccountIsFreeze));
 						msg.EndTime = FreezeEndTime;
 						SendNewCmdToClient(pClient, &msg);
-
+					
 						DelClient pDel;
 						pDel.LogTime = timeGetTime();
 						pDel.SocketID = pClient->OutsideExtraData;
 						m_DelSocketVec.push_back(pDel);
-						LogInfoToFile("WmLogonError.txt", TEXT("客户端已经被冻结 登陆失败"));
+						LogInfoToFile("WmLogonError", TEXT("1客户端已经被冻结 登陆失败"));
 						return;
 					}
 					GameServerConfig* pConfig = g_FishServerConfig.GetGameServerConfig(m_LogonManager.GetGameServerConfigIDByUserID(dwUserID));//找到一个最合适的GameServer
@@ -1346,97 +1351,99 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 			return;
 		}
 		break;
-	//case CL_AccountRsg:
-	//	{
-	//		CL_Cmd_AccountRsg* pMsg = (CL_Cmd_AccountRsg*)pCmd;
-	//		if (!pMsg)
-	//		{
-	//			ASSERT(false);
-	//			return;
-	//		}
-	//		if (!m_FishConfig.CheckVersionAndPathCrc(pMsg->VersionID, pMsg->PathCrc))
-	//		{
-	//			ASSERT(false);
-	//			LC_Cmd_CheckVersionError msg;
-	//			SetMsgInfo(msg, GetMsgType(Main_Logon, LC_CheckVersionError), sizeof(LC_Cmd_CheckVersionError));
-	//			msg.PathCrc = m_FishConfig.GetSystemConfig().PathCrc;
-	//			msg.VersionID = m_FishConfig.GetSystemConfig().VersionID;
-	//			SendNewCmdToClient(pClient, &msg);
+	case CL_AccountRsg:
+		{
+			CL_Cmd_AccountRsg* pMsg = (CL_Cmd_AccountRsg*)pCmd;
+			if (!pMsg)
+			{
+				ASSERT(false);
+				return;
+			}
+			if (!m_FishConfig.CheckVersionAndPathCrc(pMsg->VersionID, pMsg->PathCrc))
+			{
+				ASSERT(false);
+				LC_Cmd_CheckVersionError msg;
+				SetMsgInfo(msg, GetMsgType(Main_Logon, LC_CheckVersionError), sizeof(LC_Cmd_CheckVersionError));
+				msg.PathCrc = m_FishConfig.GetSystemConfig().PathCrc;
+				msg.VersionID = m_FishConfig.GetSystemConfig().VersionID;
+				SendNewCmdToClient(pClient, &msg);
 
-	//			DelClient pDel;
-	//			pDel.LogTime = timeGetTime();
-	//			pDel.SocketID = pClient->OutsideExtraData;
-	//			m_DelSocketVec.push_back(pDel);
+				DelClient pDel;
+				pDel.LogTime = timeGetTime();
+				pDel.SocketID = pClient->OutsideExtraData;
+				m_DelSocketVec.push_back(pDel);
 
-	//			LogInfoToFile("WmLogonError.txt",TEXT("客户端版本错误 普通注册失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
-	//			return;
-	//		}
-	//		if (!m_FishConfig.CheckStringIsError(pMsg->AccountName, ACCOUNT_MIN_LENGTH, ACCOUNT_LENGTH, SCT_AccountName))
-	//		{
-	//			LC_Cmd_AccountOnlyID msgClient;
-	//			SetMsgInfo(msgClient, GetMsgType(Main_Logon, LC_AccountOnlyID), sizeof(LC_Cmd_AccountOnlyID));
-	//			msgClient.dwOnlyID = 0;
-	//			msgClient.dwUserID = 0;
-	//			msgClient.GameIp = 0;
-	//			msgClient.GamePort = 0;
-	//			msgClient.GateIp = 0;
-	//			msgClient.GatePort = 0;
-	//			msgClient.LogonType = 2;
-	//			SendNewCmdToClient(pClient, &msgClient);
+				LogInfoToFile("WmLogonError",TEXT("客户端版本错误 普通注册失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+				return;
+			}
+			if (!m_FishConfig.CheckStringIsError(pMsg->AccountName, ACCOUNT_MIN_LENGTH, ACCOUNT_LENGTH, SCT_AccountName))
+			{
+				LC_Cmd_AccountOnlyID msgClient;
+				SetMsgInfo(msgClient, GetMsgType(Main_Logon, LC_AccountOnlyID), sizeof(LC_Cmd_AccountOnlyID));
+				msgClient.dwOnlyID = 0;
+				msgClient.dwUserID = 0;
+				msgClient.GameIp = 0;
+				msgClient.GamePort = 0;
+				msgClient.GateIp = 0;
+				msgClient.GatePort = 0;
+				msgClient.LogonType = 2;
+				SendNewCmdToClient(pClient, &msgClient);
 
-	//			DelClient pDel;
-	//			pDel.LogTime = timeGetTime();
-	//			pDel.SocketID = pClient->OutsideExtraData;
-	//			m_DelSocketVec.push_back(pDel);
+				DelClient pDel;
+				pDel.LogTime = timeGetTime();
+				pDel.SocketID = pClient->OutsideExtraData;
+				m_DelSocketVec.push_back(pDel);
 
-	//			LogInfoToFile("WmLogonError.txt",TEXT("客户端账号名称错误 普通注册失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
-	//			return;
-	//		}
-	//		if (m_LogonCacheManager.IsExistsAccount(pMsg->AccountName))
-	//		{
-	//			LC_Cmd_AccountOnlyID msgClient;
-	//			SetMsgInfo(msgClient, GetMsgType(Main_Logon, LC_AccountOnlyID), sizeof(LC_Cmd_AccountOnlyID));
-	//			msgClient.dwOnlyID = 0;
-	//			msgClient.dwUserID = 0;
-	//			msgClient.GameIp = 0;
-	//			msgClient.GamePort = 0;
-	//			msgClient.GateIp = 0;
-	//			msgClient.GatePort = 0;
-	//			msgClient.LogonType = 2;
-	//			SendNewCmdToClient(pClient, &msgClient);
+				LogInfoToFile("WmLogonError",TEXT("客户端账号名称错误 普通注册失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+				return;
+			}
+			if (m_LogonCacheManager.IsExistsAccount(pMsg->AccountName))
+			{
+				LC_Cmd_AccountOnlyID msgClient;
+				SetMsgInfo(msgClient, GetMsgType(Main_Logon, LC_AccountOnlyID), sizeof(LC_Cmd_AccountOnlyID));
+				msgClient.dwOnlyID = 0;
+				msgClient.dwUserID = 0;
+				msgClient.GameIp = 0;
+				msgClient.GamePort = 0;
+				msgClient.GateIp = 0;
+				msgClient.GatePort = 0;
+				msgClient.LogonType = 2;
+				SendNewCmdToClient(pClient, &msgClient);
 
-	//			DelClient pDel;
-	//			pDel.LogTime = timeGetTime();
-	//			pDel.SocketID = pClient->OutsideExtraData;
-	//			m_DelSocketVec.push_back(pDel);
+				DelClient pDel;
+				pDel.LogTime = timeGetTime();
+				pDel.SocketID = pClient->OutsideExtraData;
+				m_DelSocketVec.push_back(pDel);
 
-	//			LogInfoToFile("WmLogonError.txt",TEXT("客户端账号已经存在 普通注册失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
-	//			return;
-	//		}
+				LogInfoToFile("WmLogonError",TEXT("客户端账号已经存在 普通注册失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+				return;
+			}
 
-	//		DBR_Cmd_AccountRsg msg;
-	//		SetMsgInfo(msg,DBR_AccountRsg, sizeof(DBR_Cmd_AccountRsg));
-	//		msg.ClientID = pClient->OutsideExtraData;
-	//		TCHARCopy(msg.AccountName, CountArray(msg.AccountName), pMsg->AccountName, _tcslen(pMsg->AccountName));
-	//		TCHARCopy(msg.MacAddress, CountArray(msg.MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
-	//		msg.PasswordCrc1 = pMsg->PasswordCrc1;
-	//		msg.PasswordCrc2 = pMsg->PasswordCrc2;
-	//		msg.PasswordCrc3 = pMsg->PasswordCrc3;
-	//		msg.ClientIP = pClient->IP;
-	//		SendNetCmdToDB(&msg);
+			DBR_Cmd_AccountRsg msg;
+			SetMsgInfo(msg,DBR_AccountRsg, sizeof(DBR_Cmd_AccountRsg));
+			msg.ClientID = pClient->OutsideExtraData;
+			TCHARCopy(msg.AccountName, CountArray(msg.AccountName), pMsg->AccountName, _tcslen(pMsg->AccountName));
+			TCHARCopy(msg.MacAddress, CountArray(msg.MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
+			msg.PasswordCrc1 = pMsg->PasswordCrc1;
+			msg.PasswordCrc2 = pMsg->PasswordCrc2;
+			msg.PasswordCrc3 = pMsg->PasswordCrc3;
+			msg.ClientIP = pClient->IP;
+			SendNetCmdToDB(&msg);
 
-	//		TempAccountCacheInfo pData;
-	//		pData.ClientID = pClient->OutsideExtraData;
-	//		TCHARCopy(pData.AccountInfo.AccountName, CountArray(pData.AccountInfo.AccountName), pMsg->AccountName, _tcslen(pMsg->AccountName));
-	//		TCHARCopy(pData.AccountInfo.MacAddress, CountArray(pData.AccountInfo.MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
-	//		pData.AccountInfo.PasswordCrc1 = pMsg->PasswordCrc1;
-	//		pData.AccountInfo.PasswordCrc2 = pMsg->PasswordCrc2;
-	//		pData.AccountInfo.PasswordCrc3 = pMsg->PasswordCrc3;
-	//		m_LogonCacheManager.OnAddTempAccountInfo(pData);
+			TempAccountCacheInfo pData;
+			pData.ClientID = pClient->OutsideExtraData;
+			TCHARCopy(pData.AccountInfo.AccountName, CountArray(pData.AccountInfo.AccountName), pMsg->AccountName, _tcslen(pMsg->AccountName));
+			TCHARCopy(pData.AccountInfo.MacAddress, CountArray(pData.AccountInfo.MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
+			pData.AccountInfo.PasswordCrc1 = pMsg->PasswordCrc1;
+			pData.AccountInfo.PasswordCrc2 = pMsg->PasswordCrc2;
+			pData.AccountInfo.PasswordCrc3 = pMsg->PasswordCrc3;
+			pData.AccountInfo.IsFreeze = false;
+			pData.AccountInfo.FreezeEndTime = 31507200;
+			m_LogonCacheManager.OnAddTempAccountInfo(pData);
 
-	//		return;
-	//	}
-	//	break;
+			return;
+		}
+		break;
 	case CL_GetNewAccount:
 		{
 			CL_Cmd_GetNewAccount* pMsg = (CL_Cmd_GetNewAccount*)pCmd;
@@ -1459,7 +1466,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt",TEXT("客户端版本错误 获取新账号失败"));
+				LogInfoToFile("WmLogonError",TEXT("客户端版本错误 获取新账号失败"));
 				return;
 			}
 			//将命令转发到数据库去
@@ -1475,72 +1482,72 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 			return;
 		}
 		break;
-	//case CL_ChannelLogon:
-	//	{
-	//		//g_FishServer.ShowInfoToWin("接收到玩家进行渠道登陆1");
-	//		CL_Cmd_ChannelLogon* pMsg = (CL_Cmd_ChannelLogon*)pCmd;
-	//		if (!pMsg)
-	//		{
-	//			ASSERT(false);
-	//			return;
-	//		}
+	case CL_ChannelLogon:
+		{
+			//g_FishServer.ShowInfoToWin("接收到玩家进行渠道登陆1");
+			CL_Cmd_ChannelLogon* pMsg = (CL_Cmd_ChannelLogon*)pCmd;
+			if (!pMsg)
+			{
+				ASSERT(false);
+				return;
+			}
 
-	//		//std::vector<TCHAR*> pVec;
-	//		//GetStringArrayVecByData(pVec, &pMsg->channelInfo);
-	//		//if (pVec.size() != pMsg->channelInfo.HandleSum)
-	//		//{
-	//		//	ASSERT(false);
-	//		//	return;
-	//		//}
-	//		//if (pVec.size() >= 4)
-	//		//{
-	//		//	LogInfoToFile("WmOpLogon.txt", TEXT("start::sdk=%s&app=%s&uin=%s&sess=%s"), pVec[0], pVec[1], pVec[2], pVec[3]);
-	//		//}
-	//		//vector<TCHAR*>::iterator IterVec = pVec.begin();
-	//		//for (; IterVec != pVec.end(); ++IterVec)
-	//		//{
-	//		//	free(*IterVec);
-	//		//}
+			//std::vector<TCHAR*> pVec;
+			//GetStringArrayVecByData(pVec, &pMsg->channelInfo);
+			//if (pVec.size() != pMsg->channelInfo.HandleSum)
+			//{
+			//	ASSERT(false);
+			//	return;
+			//}
+			//if (pVec.size() >= 4)
+			//{
+			//	LogInfoToFile("WmLogon", TEXT("start::sdk=%s&app=%s&uin=%s&sess=%s"), pVec[0], pVec[1], pVec[2], pVec[3]);
+			//}
+			//vector<TCHAR*>::iterator IterVec = pVec.begin();
+			//for (; IterVec != pVec.end(); ++IterVec)
+			//{
+			//	free(*IterVec);
+			//}
 
 
-	//		//g_FishServer.ShowInfoToWin("接收到玩家进行渠道登陆2");
-	//		if (!m_FishConfig.CheckVersionAndPathCrc(pMsg->VersionID, pMsg->PathCrc))
-	//		{
-	//			ASSERT(false);
-	//			LC_Cmd_CheckVersionError msg;
-	//			SetMsgInfo(msg, GetMsgType(Main_Logon, LC_CheckVersionError), sizeof(LC_Cmd_CheckVersionError));
-	//			msg.PathCrc = m_FishConfig.GetSystemConfig().PathCrc;
-	//			msg.VersionID = m_FishConfig.GetSystemConfig().VersionID;
-	//			SendNewCmdToClient(pClient, &msg);
+			//g_FishServer.ShowInfoToWin("接收到玩家进行渠道登陆2");
+			if (!m_FishConfig.CheckVersionAndPathCrc(pMsg->VersionID, pMsg->PathCrc))
+			{
+				ASSERT(false);
+				LC_Cmd_CheckVersionError msg;
+				SetMsgInfo(msg, GetMsgType(Main_Logon, LC_CheckVersionError), sizeof(LC_Cmd_CheckVersionError));
+				msg.PathCrc = m_FishConfig.GetSystemConfig().PathCrc;
+				msg.VersionID = m_FishConfig.GetSystemConfig().VersionID;
+				SendNewCmdToClient(pClient, &msg);
 
-	//			DelClient pDel;
-	//			pDel.LogTime = timeGetTime();
-	//			pDel.SocketID = pClient->OutsideExtraData;
-	//			m_DelSocketVec.push_back(pDel);
+				DelClient pDel;
+				pDel.LogTime = timeGetTime();
+				pDel.SocketID = pClient->OutsideExtraData;
+				m_DelSocketVec.push_back(pDel);
 
-	//			LogInfoToFile("WmOpLogon.txt",TEXT("客户端版本错误 渠道登陆失败"));
-	//			return;
-	//		}
-	//		//g_FishServer.ShowInfoToWin("接收到玩家进行渠道登陆3");
-	//		//接收到渠道登陆 我们直接将命令转发到 Operater  运营服务器去
-	//		DWORD Page = sizeof(LO_Cmd_ChannelLogon)+(pMsg->channelInfo.Sum - 1)*sizeof(BYTE);
-	//		LO_Cmd_ChannelLogon* msg = (LO_Cmd_ChannelLogon*)malloc(Page);
-	//		msg->SetCmdSize(ConvertDWORDToWORD(Page));
-	//		msg->SetCmdType(GetMsgType(Main_Logon, LO_ChannelLogon));
-	//		msg->PlateFormID = pMsg->PlateFormID;
-	//		msg->ClientID = pClient->OutsideExtraData;
-	//		DWORD DataLength = (pMsg->channelInfo.Sum - 1)*sizeof(BYTE)+sizeof(ChannelUserInfo);
-	//		memcpy_s(&msg->channelInfo, DataLength, &pMsg->channelInfo, DataLength);
-	//		TCHARCopy(msg->MacAddress, CountArray(msg->MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
-	//		SendNetCmdToOperate(msg);
-	//		free(msg);
-	//		//g_FishServer.ShowInfoToWin("接收到玩家进行渠道登陆4");
+				LogInfoToFile("WmLogon",TEXT("客户端版本错误 渠道登陆失败"));
+				return;
+			}
+			//g_FishServer.ShowInfoToWin("接收到玩家进行渠道登陆3");
+			//接收到渠道登陆 我们直接将命令转发到 Operater  运营服务器去
+			DWORD Page = sizeof(LO_Cmd_ChannelLogon)+(pMsg->channelInfo.Sum - 1)*sizeof(BYTE);
+			LO_Cmd_ChannelLogon* msg = (LO_Cmd_ChannelLogon*)malloc(Page);
+			msg->SetCmdSize(ConvertDWORDToWORD(Page));
+			msg->SetCmdType(GetMsgType(Main_Logon, LO_ChannelLogon));
+			msg->PlateFormID = pMsg->PlateFormID;
+			msg->ClientID = pClient->OutsideExtraData;
+			DWORD DataLength = (pMsg->channelInfo.Sum - 1)*sizeof(BYTE)+sizeof(ChannelUserInfo);
+			memcpy_s(&msg->channelInfo, DataLength, &pMsg->channelInfo, DataLength);
+			TCHARCopy(msg->MacAddress, CountArray(msg->MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
+			SendNetCmdToOperate(msg);
+			free(msg);
+			//g_FishServer.ShowInfoToWin("接收到玩家进行渠道登陆4");
 
-	//		LogInfoToFile("WmOpLogon.txt", "客户端登录login");
+			LogInfoToFile("WmLogon", "客户端登录login");
 
-	//		return;
-	//	}	
-	//	break;
+			return;
+		}	
+		break;
 	case CL_WeiXinLogon:
 		{
 			//struct CL_Cmd_Json : public NetCmd
@@ -1687,117 +1694,15 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 			return;
 		}
 		break;
-	//case CL_QQLogon:
-	//	{
-	//		//玩家试图通过微信登陆
-	//		CL_Cmd_QQLogon* pMsg = (CL_Cmd_QQLogon*)pCmd;
-	//		if (!pMsg)
-	//		{
-	//			ASSERT(false);
-	//			return;
-	//		}
-	//		if (!m_FishConfig.CheckVersionAndPathCrc(pMsg->VersionID, pMsg->PathCrc))
-	//		{
-	//			ASSERT(false);
-	//			LC_Cmd_CheckVersionError msg;
-	//			SetMsgInfo(msg, GetMsgType(Main_Logon, LC_CheckVersionError), sizeof(LC_Cmd_CheckVersionError));
-	//			msg.PathCrc = m_FishConfig.GetSystemConfig().PathCrc;
-	//			msg.VersionID = m_FishConfig.GetSystemConfig().VersionID;
-	//			SendNewCmdToClient(pClient, &msg);
-
-	//			DelClient pDel;
-	//			pDel.LogTime = timeGetTime();
-	//			pDel.SocketID = pClient->OutsideExtraData;
-	//			m_DelSocketVec.push_back(pDel);
-
-	//			LogInfoToFile("WmLogonError.txt", TEXT("客户端版本错误 QQ登陆失败"));
-	//			return;
-	//		}
-
-	//		HashMap<DWORD, DWORD>::iterator Iter = m_UserChannelMap.find(pClient->OutsideExtraData);
-	//		if (Iter != m_UserChannelMap.end())
-	//		{
-	//			ASSERT(false);
-	//			m_UserChannelMap.erase(Iter);
-	//		}
-	//		std::vector<char*> pVec;
-	//		GetStringArrayVecByData(pVec, &pMsg->TokenInfo);
-	//		if (pVec.size() != pMsg->TokenInfo.HandleSum)
-	//		{
-	//			ASSERT(false);
-	//			return;
-	//		}
-	//		string OpenID = pVec[0];
-	//		FreeVec(pVec);
-
-	//		//生成渠道数据添加进去
-
-	//		//转化为TCHAR
-	//		UINT Count = 0;
-	//		TCHAR* pOpenID = CharToWChar(OpenID.c_str(), Count);
-	//		DWORD dwOpenID = GetCrc32(pOpenID);
-
-	//		CL_Cmd_QueryLogon msg;
-	//		SetMsgInfo(msg, GetMsgType(Main_Logon, CL_QueryLogon), sizeof(CL_Cmd_QueryLogon));
-	//		//1.账号名称
-	//		_stprintf_s(msg.AccountName, CountArray(msg.AccountName), TEXT("QQ%u"), dwOpenID);
-	//		TCHAR Password[32];
-	//		int length = _stprintf_s(Password, CountArray(Password), TEXT("QQPass%u"), dwOpenID);
-	//		for (int i = length + 1; i < 32; ++i)
-	//			Password[i] = 0xfefe;
-
-	//		free(pOpenID);
-
-	//		AE_CRC_THREE pTree;
-	//		AECrc32(pTree, Password, CountArray(Password) * sizeof(TCHAR), 0, 0x735739, 0x79387731);
-	//		msg.PasswordCrc1 = pTree.Crc1;
-	//		msg.PasswordCrc2 = pTree.Crc2;
-	//		msg.PasswordCrc3 = pTree.Crc3;
-	//		msg.PlateFormID = pMsg->PlateFormID;
-	//		msg.VersionID = m_FishConfig.GetSystemConfig().VersionID;
-	//		msg.PathCrc = m_FishConfig.GetSystemConfig().PathCrc;
-	//		TCHARCopy(msg.MacAddress, CountArray(msg.MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
-	//		msg.LogonType = 3;
-
-	//		/*LC_Cmd_SaveAccountInfo msgSave;
-	//		SetMsgInfo(msgSave, GetMsgType(Main_Logon, LC_SaveAccountInfo), sizeof(LC_Cmd_SaveAccountInfo));
-	//		TCHARCopy(msgSave.AccountName, CountArray(msgSave.AccountName), msg.AccountName, _tcslen(msg.AccountName));
-	//		msgSave.PasswordCrc1 = pTree.Crc1;
-	//		msgSave.PasswordCrc2 = pTree.Crc2;
-	//		msgSave.PasswordCrc3 = pTree.Crc3;
-	//		SendNewCmdToClient(pClient, &msgSave);*/
-	//		LogInfoToFile("WmQQLogon.txt", TEXT("玩家账号:%s "), msg.AccountName);
-
-
-	//		HandleClientMsg(pClient, &msg);
-
-
-	//		//接收到渠道登陆 我们直接将命令转发到 Operater  运营服务器去
-	//		/*DWORD Page = sizeof(LO_Cmd_QQLogon)+(pMsg->TokenInfo.Sum - 1)*sizeof(BYTE);
-	//		LO_Cmd_QQLogon* msg = (LO_Cmd_QQLogon*)malloc(Page);
-	//		msg->SetCmdSize(ConvertDWORDToWORD(Page));
-	//		msg->SetCmdType(GetMsgType(Main_Logon, LO_QQLogon));
-	//		msg->PlateFormID = pMsg->PlateFormID;
-	//		msg->ClientID = pClient->OutsideExtraData;
-	//		DWORD DataLength = (pMsg->TokenInfo.Sum - 1)*sizeof(BYTE)+sizeof(QQUserCodeInfo);
-	//		memcpy_s(&msg->TokenInfo, DataLength, &pMsg->TokenInfo, DataLength);
-	//		TCHARCopy(msg->MacAddress, CountArray(msg->MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
-	//		SendNetCmdToOperate(msg);
-	//		free(msg);
-	//		ShowInfoToWin("接收QQ登陆");*/
-	//		return;
-	//	}
-	//	break;
-	case CL_QueryLogon:
+	case CL_QQLogon:
 		{
-
-			CL_Cmd_QueryLogon* pMsg = (CL_Cmd_QueryLogon*)pCmd;
+			//玩家试图通过微信登陆
+			CL_Cmd_QQLogon* pMsg = (CL_Cmd_QQLogon*)pCmd;
 			if (!pMsg)
 			{
 				ASSERT(false);
 				return;
 			}
-			LogInfoToFile("WmQQLogon.txt", TEXT("pMsg->VersionID=%d "), pMsg->VersionID);
 			if (!m_FishConfig.CheckVersionAndPathCrc(pMsg->VersionID, pMsg->PathCrc))
 			{
 				ASSERT(false);
@@ -1812,7 +1717,109 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt",TEXT("客户端版本错误 快速登陆失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+				LogInfoToFile("WmLogonError", TEXT("客户端版本错误 QQ登陆失败"));
+				return;
+			}
+
+			HashMap<DWORD, DWORD>::iterator Iter = m_UserChannelMap.find(pClient->OutsideExtraData);
+			if (Iter != m_UserChannelMap.end())
+			{
+				ASSERT(false);
+				m_UserChannelMap.erase(Iter);
+			}
+			std::vector<char*> pVec;
+			GetStringArrayVecByData(pVec, &pMsg->TokenInfo);
+			if (pVec.size() != pMsg->TokenInfo.HandleSum)
+			{
+				ASSERT(false);
+				return;
+			}
+			string OpenID = pVec[0];
+			FreeVec(pVec);
+
+			//生成渠道数据添加进去
+
+			//转化为TCHAR
+			UINT Count = 0;
+			TCHAR* pOpenID = CharToWChar(OpenID.c_str(), Count);
+			DWORD dwOpenID = GetCrc32(pOpenID);
+
+			CL_Cmd_QueryLogon msg;
+			SetMsgInfo(msg, GetMsgType(Main_Logon, CL_QueryLogon), sizeof(CL_Cmd_QueryLogon));
+			//1.账号名称
+			_stprintf_s(msg.AccountName, CountArray(msg.AccountName), TEXT("QQ%u"), dwOpenID);
+			TCHAR Password[32];
+			int length = _stprintf_s(Password, CountArray(Password), TEXT("QQPass%u"), dwOpenID);
+			for (int i = length + 1; i < 32; ++i)
+				Password[i] = 0xfefe;
+
+			free(pOpenID);
+
+			AE_CRC_THREE pTree;
+			AECrc32(pTree, Password, CountArray(Password) * sizeof(TCHAR), 0, 0x735739, 0x79387731);
+			msg.PasswordCrc1 = pTree.Crc1;
+			msg.PasswordCrc2 = pTree.Crc2;
+			msg.PasswordCrc3 = pTree.Crc3;
+			msg.PlateFormID = pMsg->PlateFormID;
+			msg.VersionID = m_FishConfig.GetSystemConfig().VersionID;
+			msg.PathCrc = m_FishConfig.GetSystemConfig().PathCrc;
+			TCHARCopy(msg.MacAddress, CountArray(msg.MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
+			msg.LogonType = 3;
+
+			/*LC_Cmd_SaveAccountInfo msgSave;
+			SetMsgInfo(msgSave, GetMsgType(Main_Logon, LC_SaveAccountInfo), sizeof(LC_Cmd_SaveAccountInfo));
+			TCHARCopy(msgSave.AccountName, CountArray(msgSave.AccountName), msg.AccountName, _tcslen(msg.AccountName));
+			msgSave.PasswordCrc1 = pTree.Crc1;
+			msgSave.PasswordCrc2 = pTree.Crc2;
+			msgSave.PasswordCrc3 = pTree.Crc3;
+			SendNewCmdToClient(pClient, &msgSave);*/
+		    LogInfoToFile("WmQQLogon.txt", TEXT("玩家账号:%s "), msg.AccountName);
+
+
+			HandleClientMsg(pClient, &msg);
+
+
+			//接收到渠道登陆 我们直接将命令转发到 Operater  运营服务器去
+			/*DWORD Page = sizeof(LO_Cmd_QQLogon)+(pMsg->TokenInfo.Sum - 1)*sizeof(BYTE);
+			LO_Cmd_QQLogon* msg = (LO_Cmd_QQLogon*)malloc(Page);
+			msg->SetCmdSize(ConvertDWORDToWORD(Page));
+			msg->SetCmdType(GetMsgType(Main_Logon, LO_QQLogon));
+			msg->PlateFormID = pMsg->PlateFormID;
+			msg->ClientID = pClient->OutsideExtraData;
+			DWORD DataLength = (pMsg->TokenInfo.Sum - 1)*sizeof(BYTE)+sizeof(QQUserCodeInfo);
+			memcpy_s(&msg->TokenInfo, DataLength, &pMsg->TokenInfo, DataLength);
+			TCHARCopy(msg->MacAddress, CountArray(msg->MacAddress), pMsg->MacAddress, _tcslen(pMsg->MacAddress));
+			SendNetCmdToOperate(msg);
+			free(msg);
+			ShowInfoToWin("接收QQ登陆");*/
+			return;
+		}
+		break;
+	case CL_QueryLogon:
+		{
+
+			CL_Cmd_QueryLogon* pMsg = (CL_Cmd_QueryLogon*)pCmd;
+			if (!pMsg)
+			{
+				ASSERT(false);
+				return;
+			}
+		//	LogInfoToFile("WmQQLogon.txt", TEXT("pMsg->VersionID=%d "), pMsg->VersionID);
+			if (!m_FishConfig.CheckVersionAndPathCrc(pMsg->VersionID, pMsg->PathCrc))
+			{
+				ASSERT(false);
+				LC_Cmd_CheckVersionError msg;
+				SetMsgInfo(msg, GetMsgType(Main_Logon, LC_CheckVersionError), sizeof(LC_Cmd_CheckVersionError));
+				msg.PathCrc = m_FishConfig.GetSystemConfig().PathCrc;
+				msg.VersionID = m_FishConfig.GetSystemConfig().VersionID;
+				SendNewCmdToClient(pClient, &msg);
+
+				DelClient pDel;
+				pDel.LogTime = timeGetTime();
+				pDel.SocketID = pClient->OutsideExtraData;
+				m_DelSocketVec.push_back(pDel);
+
+				LogInfoToFile("WmLogonError",TEXT("客户端版本错误 快速登陆失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
 				return;
 			}
 			//g_FishServer.ShowInfoToWin("客户端进行快速登陆2");
@@ -1834,9 +1841,10 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt",TEXT("客户端账号名称错误 快速登陆失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+				LogInfoToFile("WmLogonError",TEXT("客户端账号名称错误 快速登陆失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
 				return;
 			}
+		//	LogInfoToFile("WmQQLogon.txt", TEXT("222pMsg->VersionID=%d "), pMsg->VersionID);
 			//g_FishServer.ShowInfoToWin("客户端进行快速登陆3");
 			//先向缓存请求
 			DWORD dwUserID = 0;
@@ -1866,6 +1874,8 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 				pData.AccountInfo.PasswordCrc1 = pMsg->PasswordCrc1;
 				pData.AccountInfo.PasswordCrc2 = pMsg->PasswordCrc2;
 				pData.AccountInfo.PasswordCrc3 = pMsg->PasswordCrc3;
+				pData.AccountInfo.IsFreeze = false;
+				pData.AccountInfo.FreezeEndTime = 31507200;
 				m_LogonCacheManager.OnAddTempAccountInfo(pData);
 
 				//g_FishServer.ShowInfoToWin("客户端进行快速登陆4");
@@ -1894,7 +1904,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 
 					//g_FishServer.ShowInfoToWin("客户端进行快速登陆5");
 
-					LogInfoToFile("WmLogonError.txt",TEXT("客户端账号密码错误 快速登陆失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+					LogInfoToFile("WmLogonError",TEXT("客户端账号密码错误 快速登陆失败 玩家账号:%s 密码:%u,%u,%u"), pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
 				}
 				else
 				{
@@ -1909,7 +1919,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 						pDel.LogTime = timeGetTime();
 						pDel.SocketID = pClient->OutsideExtraData;
 						m_DelSocketVec.push_back(pDel);
-						LogInfoToFile("WmLogonError.txt", TEXT("客户端已经被冻结 登陆失败"));
+						LogInfoToFile("WmLogonError", TEXT("2客户端已经被冻结 登陆失败"));
 						return;
 					}
 					GameServerConfig* pConfig = g_FishServerConfig.GetGameServerConfig(m_LogonManager.GetGameServerConfigIDByUserID(dwUserID));//找到一个最合适的GameServer
@@ -1932,7 +1942,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 					DWORD OnlyID = RandUInt();
 					//1.发送命令到GameServer去
 					OnSendChannelInfoToGameServer(dwUserID, pClient->OutsideExtraData, pConfig->NetworkID);
-					LogInfoToFile("WmQQLogon.txt", TEXT("LG_AccountOnlyID:%d onlyid=%d "), dwUserID, OnlyID);
+			//		LogInfoToFile("WmQQLogon.txt", TEXT("LG_AccountOnlyID:%d onlyid=%d "), dwUserID, OnlyID);
 					LG_Cmd_AccountOnlyID msgGameServer;
 					SetMsgInfo(msgGameServer, GetMsgType(Main_Logon, LG_AccountOnlyID), sizeof(LG_Cmd_AccountOnlyID));
 					msgGameServer.dwOnlyID = OnlyID;
@@ -1992,7 +2002,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 	case CL_PhoneSecPwd:
 		{
 			CL_Cmd_PhoneSecPwd* pMsg = (CL_Cmd_PhoneSecPwd*)pCmd;
-			LogInfoToFile("WmLogonError.txt", TEXT("客户端版本错误 手机二级密码登陆失败 玩家手机号:%llu 密码:%u,%u,%u"), pMsg->PhoneNumber, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+			LogInfoToFile("WmLogonError", TEXT("客户端版本错误 手机二级密码登陆失败 玩家手机号:%llu 密码:%u,%u,%u"), pMsg->PhoneNumber, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
 			return;
 
 			if (!pMsg)
@@ -2014,7 +2024,7 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端版本错误 手机二级密码登陆失败 玩家手机号:%llu 密码:%u,%u,%u"), pMsg->PhoneNumber, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
+				LogInfoToFile("WmLogonError", TEXT("客户端版本错误 手机二级密码登陆失败 玩家手机号:%llu 密码:%u,%u,%u"), pMsg->PhoneNumber, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);
 				return;
 			}
 			//玩家进行二级密码登陆
@@ -2025,6 +2035,8 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 			pData.AccountInfo.PasswordCrc1 = pMsg->PasswordCrc1;
 			pData.AccountInfo.PasswordCrc2 = pMsg->PasswordCrc2;
 			pData.AccountInfo.PasswordCrc3 = pMsg->PasswordCrc3;
+			pData.AccountInfo.IsFreeze = false;
+			pData.AccountInfo.FreezeEndTime = 31507200;
 			m_LogonCacheManager.OnAddTempAccountInfo(pData);
 
 			DBR_Cmd_PhoneSecPwd msg;
@@ -2116,7 +2128,7 @@ void FishServer::HandleGameServerMsg(NetCmd* pCmd)//处理GameServer发送来的命令
 						msgClient.GatePort = pGateWay->Port;
 					}
 				}
-				LogInfoToFile("WmQQLogon.txt", TEXT("GL_AccountOnlyID:%d onlyid=%d "), pMsg->dwUserID, pMsg->dwOnlyID);
+				LogInfoToFile("WmLogon", "GL_AccountOnlyID:user:%d onlyid=%u ", pMsg->dwUserID, pMsg->dwOnlyID);
 				msgClient.HallTimeOut = pConfig->TimeOut;//大厅的超时时间
 				msgClient.LogonType = pMsg->LogonTypeID;
 				SendNewCmdToClient(pClientData, &msgClient);
@@ -2182,7 +2194,7 @@ void FishServer::OnLogonDBDataSucess()
 	{
 		Sleep(5);
 	}
-	ShowInfoToWin("LogonServer 初始化成功");
+	ShowInfoToWin("LogonServer init success 初始化成功");
 	return;
 }
 //GameServerInfo* FishServer::GetGameServerInfo(DWORD GameServerID)
@@ -2253,7 +2265,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt",TEXT("客户端账号密码错误 数据库普通登陆失败4"));
+				LogInfoToFile("WmLogonError",TEXT("客户端账号密码错误 数据库普通登陆失败4"));
 				return;
 			}
 			else if (pMsg->IsFreeze)
@@ -2269,7 +2281,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端已经被冻结 登陆失败"));
+				LogInfoToFile("WmLogonError", TEXT("3客户端已经被冻结 登陆失败"));
 				return;
 			}
 			/*ServerClientData* pGameServer = GetMaxFreeGameServer();
@@ -2345,7 +2357,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端账号密码错误 数据库普通注册失败"));
+				LogInfoToFile("WmLogonError", TEXT("客户端账号密码错误 数据库普通注册失败"));
 				return;
 			}
 			m_LogonCacheManager.OnCheckTempAccountInfo(pClient->OutsideExtraData, pMsg->dwUserID, true);
@@ -2402,7 +2414,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				m_LogonCacheManager.OnAddAccountInfo(pMsg->dwUserID, pMsg->AccountName, pMsg->PasswordCrc1, pMsg->PasswordCrc2, pMsg->PasswordCrc3);//将已经创建的账号保存起来
 			else
 			{
-				LogInfoToFile("WmLogonError.txt",TEXT("客户端账号密码错误 数据库获取新账号失败"));
+				LogInfoToFile("WmLogonError",TEXT("客户端账号密码错误 数据库获取新账号失败"));
 			}
 			//将命令转发到客户端去
 			LC_Cmd_GetNewAccount msg;
@@ -2458,7 +2470,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				ASSERT(false);
 				return;
 			}
-			LogInfoToFile("WmQQLogon.txt", TEXT("DBO_QueryLogon::pMsg->dwUserID=%d "), pMsg->dwUserID);
+			//LogInfoToFile("WmQQLogon.txt", TEXT("DBO_QueryLogon::pMsg->dwUserID=%d "), pMsg->dwUserID);
 			//已经获取到账号了 我们进行登陆处理
 			//1.将账号数据缓存起来
 			if (pMsg->dwUserID == 0)
@@ -2481,7 +2493,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt",TEXT("2222客户端账号密码错误 数据库快速登陆失败"));
+				LogInfoToFile("WmLogonError",TEXT("2222客户端账号密码错误 数据库快速登陆失败"));
 				return;
 			}
 			else if (pMsg->IsFreeze)
@@ -2497,7 +2509,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端已经被冻结 登陆失败"));
+				LogInfoToFile("WmLogonError", TEXT("4客户端已经被冻结 登陆失败"));
 				return;
 			}
 			m_LogonCacheManager.OnCheckTempAccountInfo(pClient->OutsideExtraData, pMsg->dwUserID, true);
@@ -2531,7 +2543,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 			msgGameServer.LogonTypeID = 1;
 			msgGameServer.LogonID = m_LogonConfigID;
 			SendNetCmdToGameServer(pConfig->NetworkID, &msgGameServer);
-			LogInfoToFile("WmQQLogon.txt", TEXT("DBO_QueryLogon::pMsg->IsNewRsg=%d "), pMsg->IsNewRsg);
+			//LogInfoToFile("WmQQLogon.txt", TEXT("DBO_QueryLogon::pMsg->IsNewRsg=%d "), pMsg->IsNewRsg);
 			if (pMsg->IsNewRsg)
 			{
 				LC_Cmd_RsgNewAccount msg;
@@ -2574,7 +2586,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt", TEXT("手机二级密码登陆错误"));
+				LogInfoToFile("WmLogonError", TEXT("手机二级密码登陆错误"));
 				return;
 			}
 			else if (pMsg->IsFreeze)
@@ -2591,7 +2603,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端已经被冻结 登陆失败"));
+				LogInfoToFile("WmLogonError", TEXT("5客户端已经被冻结 登陆失败"));
 				return;
 			}
 			GameServerConfig* pConfig = g_FishServerConfig.GetGameServerConfig(m_LogonManager.GetGameServerConfigIDByUserID(pMsg->dwUserID));//找到一个最合适的GameServer
@@ -2651,7 +2663,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				msg.ErrorID = PLE_SystemError;
 				SendNewCmdToClient(pClient, &msg);
 				m_LogonCacheManager.OnCheckTempAccountInfo(pClient->OutsideExtraData, pMsg->AccountName, pMsg->dwUserID, false);
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端手机号码登陆 UserID为0 登陆失败"));
+				LogInfoToFile("WmLogonError", TEXT("客户端手机号码登陆 UserID为0 登陆失败"));
 				return;
 			}
 			else if (pMsg->IsFreeze)
@@ -2675,7 +2687,7 @@ void FishServer::HandleDataBaseMsg(NetCmd* pCmd)
 				pDel.SocketID = pClient->OutsideExtraData;
 				m_DelSocketVec.push_back(pDel);
 
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端已经被冻结 登陆失败"));
+				LogInfoToFile("WmLogonError", TEXT("6客户端已经被冻结 登陆失败"));
 				return;
 			}
 			else
@@ -2905,7 +2917,7 @@ void FishServer::HandleOperateMsg(NetCmd* pCmd)
 				SetMsgInfo(msg, GetMsgType(Main_Logon, LC_WeiXinLogon), sizeof(LC_Cmd_WeiXinLogon));
 				msg.Result = pMsg->Result;
 				SendNewCmdToClient(pClient, &msg);
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端微信登陆失败"));
+				LogInfoToFile("WmLogonError", TEXT("客户端微信登陆失败"));
 			}
 			return;
 		}
@@ -2981,7 +2993,7 @@ void FishServer::HandleOperateMsg(NetCmd* pCmd)
 				SetMsgInfo(msg, GetMsgType(Main_Logon, LC_QQLogon), sizeof(LC_Cmd_QQLogon));
 				msg.Result = pMsg->Result;
 				SendNewCmdToClient(pClient, &msg);
-				LogInfoToFile("WmLogonError.txt", TEXT("客户端QQ登陆失败"));
+				LogInfoToFile("WmLogonError", TEXT("客户端QQ登陆失败"));
 			}
 			return;
 		}
@@ -3023,7 +3035,7 @@ void FishServer::HandleOperateMsg(NetCmd* pCmd)
 					return;
 				}
 				
-				//LogInfoToFile("WmOpLogon.txt", TEXT("return::sdk=%s&app=%s&uin=%s&sess=%s"), pVec[0]->Array, pVec[1]->Array, pVec[2]->Array, pVec[3]->Array);
+				//LogInfoToFile("WmLogon", TEXT("return::sdk=%s&app=%s&uin=%s&sess=%s"), pVec[0]->Array, pVec[1]->Array, pVec[2]->Array, pVec[3]->Array);
 				TCHAR Channel[64] = {0};
 				DWORD len = pVec[0]->Length;
 				if (len < (64-1)*2)
@@ -3075,7 +3087,7 @@ void FishServer::HandleOperateMsg(NetCmd* pCmd)
 				msg.LogonType = 1;
 				HandleClientMsg(pClient, &msg);
 
-				LogInfoToFile("WmOpLogon.txt", TEXT("渠道登录成功 用户名:%s Password:%s  %u  %u  %u"), msg.AccountName, Password, msg.PasswordCrc1, msg.PasswordCrc2, msg.PasswordCrc3);
+				LogInfoToFile("WmLogon", TEXT("渠道登录成功 用户名:%s Password:%s  %u  %u  %u"), msg.AccountName, Password, msg.PasswordCrc1, msg.PasswordCrc2, msg.PasswordCrc3);
 
 				/*vector<TCHAR*>::iterator Iter = pVec.begin();
 				for (; Iter != pVec.end(); ++Iter)
@@ -3094,7 +3106,7 @@ void FishServer::HandleOperateMsg(NetCmd* pCmd)
 				msg.Result = pMsg->Result;
 				SendNewCmdToClient(pClient, &msg);
 
-				LogInfoToFile("WmOperatorLogon.txt",TEXT("客户端渠道登陆失败"));
+				LogInfoToFile("WmLogon",TEXT("客户端渠道登陆失败"));
 
 				//g_FishServer.ShowInfoToWin("接收到玩家进行渠道结果返回5");
 			}
@@ -3148,6 +3160,8 @@ void FishServer::HandleOperateMsg(NetCmd* pCmd)
 				pData.AccountInfo.PasswordCrc1 = pMsg->Crc1;
 				pData.AccountInfo.PasswordCrc2 = pMsg->Crc2;
 				pData.AccountInfo.PasswordCrc3 = pMsg->Crc3;
+				pData.AccountInfo.IsFreeze = false;
+				pData.AccountInfo.FreezeEndTime = 31507200;
 				m_LogonCacheManager.OnAddTempAccountInfo(pData);
 
 				DBR_Cmd_PhoneLogon msg;
@@ -3299,8 +3313,8 @@ void FishServer::OnUpdateWriteGameServerUserMap(DWORD dwTimer)
 			pDel.SocketID = pClient->OutsideExtraData;
 			m_DelSocketVec.push_back(pDel);
 
-			//LogInfoToFile("WmLogonError.txt",TEXT("客户端连接login GameServer time out超时登陆失败"));
-			LogInfoToFile("WmLogonError.txt", "客户端连接login GameServer time out超时登陆失败");
+			//LogInfoToFile("WmLogonError",TEXT("客户端连接login GameServer time out超时登陆失败"));
+			LogInfoToFile("WmLogonError", "客户端连接login GameServer time out超时登陆失败");
 			Iter = m_SendGameUserMap.erase(Iter);
 		}
 		else

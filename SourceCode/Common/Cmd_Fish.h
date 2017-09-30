@@ -4320,9 +4320,10 @@ struct DBO_Cmd_LoadAllAccountInfo :public NetCmd//变长分包命令
 struct DBR_Cmd_LogInfo :public NetCmd
 {
 	DWORD			UserID;
-	BYTE			Type;
-	int				TypeSum;
-	DWORD			Param;
+	WORD			Type;  //类型
+	DWORD			TypeSum;//ItemID
+	DWORD			Param;//更新前
+	DWORD			EndParam;//更新后
 	TCHAR			Info[DB_Log_Str_Length+1];
 };
 
@@ -4477,6 +4478,7 @@ struct DBR_Cmd_LogCarInfo :public NetCmd
 struct DBR_Cmd_LogStockScore :public NetCmd
 {
 	INT64 StockScore;
+	INT64 TaxScore;
 	WORD ServerID;
 	BYTE TableType;
 };
@@ -6366,6 +6368,7 @@ struct LC_Cmd_ChangeRoleOnlineRewardStates : public NetCmd
 {
 	//bool 	bComplete;
 	DWORD	States;
+	DWORD   OnlineSec;
 };
 
 //struct CC_Cmd_ChangRoleExp : public NetCmd
@@ -7918,7 +7921,18 @@ enum OnlineRewardSub
 	CL_GetAllOnlineReward = 3,
 	LC_GetAllOnlineReward = 4,
 	LC_NoticeOnlineRewardComplete = 5,
+	CL_OnlineSec = 6,
+	LC_OnlineSec = 7,
 };
+
+struct CL_Cmd_GetOnlineSec : public NetCmd
+{
+};
+struct LC_Cmd_GetOnlineSec : public NetCmd
+{
+	DWORD       OnlineSec;
+};
+
 struct CL_Cmd_GetOnlineReward : public NetCmd
 {
 	BYTE		ID;
@@ -7928,6 +7942,7 @@ struct LC_Cmd_GetOnlineReward : public NetCmd
 	BYTE		RewardID;
 	DWORD		States;
 	bool		Result;//是否成功
+	DWORD       OnlineSec;
 };
 
 struct LC_Cmd_GetAllOnlineReward : public NetCmd
@@ -8695,7 +8710,7 @@ enum ControlSub
 	LC_CarAdminQueryName = 52,//查询名字
 	LC_CarAdminQueryAllJetton = 53,//查询所有
 	LC_CarAdminQueryPlayerJetton = 54,//
-
+	CL_UnSetBlackList = 55,//设置黑名单
 	//新定gm
 	LC_GM_Charge = 101,
 };
@@ -8914,7 +8929,15 @@ struct LC_CMD_QueryFishBlackListResult :public NetCmd
 struct LC_CMD_SetFishBlackList :public NetCmd
 {
 	DWORD ClientID;
-	DWORD dwUserID[1];
+	DWORD dwUserID;
+	//DWORD dwUserID[1];
+};
+
+struct LC_CMD_UnSetFishBlackList :public NetCmd
+{
+	DWORD ClientID;
+	DWORD dwUserID;
+		//DWORD dwUserID[1];
 };
 struct LC_CMD_SetFishBlackListResult :public NetCmd
 {
@@ -11083,6 +11106,7 @@ struct LC_Cmd_CarRoleBetGlobelByLog : public NetCmd
 	bool			Result;
 	DWORD			betGlobel[MAX_CAR_ClientSum];
 };
+
 
 
 #pragma pack(pop)

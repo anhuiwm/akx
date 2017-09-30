@@ -129,7 +129,7 @@ void WeiXinLogon::OnHandleWeiXinTokenResult(unsigned __int64 OnlyID, char* pData
 		ASSERT(false);
 		return;
 	}
-	LogInfoToFile("WmLogonError.txt", "微信登陆 接收到数据 %s", pData);
+	LogInfoToFile("WmLogonError", "微信登陆 接收到数据 %s", pData);
 	HashMap<UINT64, tagWeiXinUser>::iterator Iter = m_UserMap.find(OnlyID);
 	if (Iter == m_UserMap.end())
 	{

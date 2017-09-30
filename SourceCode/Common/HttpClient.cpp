@@ -355,7 +355,7 @@ bool HttpClient::AddRequest(UINT_PTR ID, USHORT hostIdx, const char *pcURL, bool
 		Log("添加URLRequest失败");
 		return false;
 	}
-	LogInfoToFile("WmOpLogonLog.txt", "添加HttpClient请求，ID:%u, 字符串:%s", ID, pcURL);
+	LogInfoToFile("WmOpLogon", "添加HttpClient请求，ID:%u, 字符串:%s", ID, pcURL);
 	return true;
 }
 
@@ -469,7 +469,7 @@ void HttpClient::_Thread()
 					{
 						SYSTEMTIME pTime;
 						GetLocalTime(&pTime);
-						LogInfoToFile("WmOpLogonLog.txt", "接收到数据-> ID:%u, 长度:%d, 主机地址:%s, Time: %02d:%02d:%02d", hcr->ID, hcr->RecvSize, m_HostList[hcr->HostIdx].Host, pTime.wHour, pTime.wMinute, pTime.wSecond);
+						//LogInfoToFile("WmOpLogonLog.", "接收到数据-> ID:%u, 长度:%d, 主机地址:%s, Time: %02d:%02d:%02d", hcr->ID, hcr->RecvSize, m_HostList[hcr->HostIdx].Host, pTime.wHour, pTime.wMinute, pTime.wSecond);
 						hcr->State = REQUEST_OK;
 					}
 					else if (cr == CHECK_FAILED)
@@ -484,7 +484,7 @@ void HttpClient::_Thread()
 				}
 				break;
 			default:
-				LogInfoToFile("WmOpLogonLog.txt", "未知的Request状态:%d", hcr->State);
+				LogInfoToFile("WmOpLogon", "未知的Request状态:%d", hcr->State);
 				hcr->State = REQUEST_FAILED;
 				break;
 			}

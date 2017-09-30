@@ -89,7 +89,7 @@ void RankManager::SaveNowDayRankInfo()
 	//空白的无需写配置文件  3:50  我们应该保存今天的文件  有可能是中间的时间
 	DWORD AllRankSum = 0;
 
-#if 0
+#if 1
 	time_t tm = time(NULL) + Diff_Update_Sec - g_FishServer.GetFishConfig().GetWriteSec();
 	SYSTEMTIME time = TimeTToSystemTime(tm);
 
@@ -159,7 +159,8 @@ void RankManager::SaveNowDayRankInfo()
 	string FilePath = RankFilePath;
 	FilePath  += FileName;
 	xmlDoc.SaveFile(FilePath.c_str());
-	SaveFileToFtp(FilePath.c_str(),FileName);//将文件传输到FTP去
+	SaveFileToFtp(FilePath.c_str(), "Rank.xml");//将文件传输到FTP去
+	//SaveFileToFtp(FilePath.c_str(),FileName);//将文件传输到FTP去
 #if 0
 	if (time.wDayOfWeek == g_FishServer.GetFishConfig().GetRankConfig().RankWeekDay)//创建一个星期排行榜的奖励文件
 	{
@@ -207,7 +208,7 @@ void RankManager::SaveNowDayRankInfo()
 	}
 	else
 #endif
-		g_FishServer.ShowInfoToWin("生成新的排行榜文件: %s", FileName);
+	g_FishServer.ShowInfoToWin("生成新的排行榜文件: %s", FileName);
 	m_RankArray.clear();//当前的数据立刻清空掉
 }
 void RankManager::SaveFileToFtp(const char* FilePath,const char* FileName)

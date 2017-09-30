@@ -1,12 +1,24 @@
 #pragma once
 #pragma pack(push)
 #pragma pack(1)
-#define HEAD_LENGTH 4
+
 struct NetCmd
 {
 	USHORT	CmdSize;
 	BYTE	SubCmdType;
 	BYTE	CmdType;
+	/*USHORT  Rand;
+	USHORT  Identity;*/
+	void CreateRandMask()
+	{
+		//Rand = rand() % USHRT_MAX;
+		//Identity = (~Rand) ^ (~CmdSize) ^ (~SubCmdType) ^ (~CmdType);
+	}
+	bool CheckRandMask()
+	{
+		return true;
+		//return Identity == (~Rand) ^ (~CmdSize) ^ (~SubCmdType) ^ (~CmdType);
+	}
 	void SetCmdType(USHORT cmdType)
 	{
 		CmdType = static_cast<BYTE>(cmdType >> 8);

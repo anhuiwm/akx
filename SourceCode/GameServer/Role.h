@@ -118,7 +118,9 @@ public:
 	DWORD GetRoleLuckyValue();
 
 	USHORT TableRate();
-	float RandTimeRate(float fmin, float fmax, BYTE byFishType);
+	//float RandTimeRate(float fmin, float fmax, BYTE byFishType);
+	float RandTimeRate();
+	float RechargeRate();
 	void ClearComb();
 	void AddDropReward(ushort nReward);
 
@@ -162,7 +164,8 @@ private:
 	DWORD						m_LuckyValue;//玩家的幸运值
 
 	DWORD						m_dwUpdateRandomtime;
-	vector<int> m_vecRandomByTime;;
+	//vector<int> m_vecRandomByTime;;
+	float                         m_RandomByTime = 0.0f;
 
 	DWORD						m_dwLastUseSkillTime;
 

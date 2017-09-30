@@ -88,7 +88,7 @@ bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string app, string cbi, strin
 	CheckStr = CheckStr + Key;
 	string Md5Str = md5(CheckStr);//加密后的签名
 
-	//LogInfoToFile("WmLogRechargeInfo.txt", "checkstr=%s,Md5str=%s,sign=%s",
+	//LogInfoToFile("WmRechargeInfo", "checkstr=%s,Md5str=%s,sign=%s",
 	//	CheckStr.c_str(),Md5Str.c_str(), sign.c_str());
 
 	if (Md5Str.compare(sign) != 0)//验证签名是否正确
@@ -112,7 +112,7 @@ bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string app, string cbi, strin
 	{
 		g_DBLogManager.LogUserRechargeLogToDB("operator server fail:repeat order", orderid, UserID, ChannelCode, channelOrderid, channelLabel, ShopItemID, dPrice, FreePrice, 0, 0, 0, 0, 0, SendLogDB);
 		//g_DBLogManager.LogUserRechargeLogToDB("5运营服务器验证失败:重复的订单", orderid, UserID, ChannelCode, channelOrderid, channelLabel, ShopItemID, dPrice, FreePrice, 0, 0, 0, 0, 0, SendLogDB);
-		//LogInfoToFile("LogRechargeInfo.txt", "充值异步回调 订单重复执行: orderid=%s", orderid.c_str());
+		//LogInfoToFile("RechargeInfo", "充值异步回调 订单重复执行: orderid=%s", orderid.c_str());
 		return false;//订单号存在
 	}
 
@@ -176,7 +176,7 @@ bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string app, string cbi, strin
 //bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string orderid, string price, string ChannelCode, string channelOrderid, string channelLabel, string callbackInfo, string sign)
 //{
 //	//旧版本
-//	LogInfoToFile("WmLogRechargeInfo.txt", "充值异步回调: orderid=%s, price=%s,ChannelCode=%s, channelOrderid =%s, channelLabel =%s, callbackInfo=%s, sign=%s", orderid.c_str(), price.c_str(), ChannelCode.c_str(), channelOrderid.c_str(), channelLabel.c_str(), callbackInfo.c_str(), sign.c_str());
+//	LogInfoToFile("WmRechargeInfo", "充值异步回调: orderid=%s, price=%s,ChannelCode=%s, channelOrderid =%s, channelLabel =%s, callbackInfo=%s, sign=%s", orderid.c_str(), price.c_str(), ChannelCode.c_str(), channelOrderid.c_str(), channelLabel.c_str(), callbackInfo.c_str(), sign.c_str());
 //
 //	//命令应该可以做到玩家所在的Center所在
 //	//CustParam 应该包含  UserID  /ShopID 
@@ -230,7 +230,7 @@ bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string app, string cbi, strin
 //	if (g_FishServer.GetOrderOnlyManager().IsExists(i64Value, OT_SDK))
 //	{
 //		g_DBLogManager.LogUserRechargeLogToDB("运营服务器验证失败:重复的订单", orderid, UserID, ChannelCode, channelOrderid, channelLabel, ShopItemID, dPrice, 0, 0, 0, 0, 0, 0, SendLogDB);
-//		//LogInfoToFile("LogRechargeInfo.txt", "充值异步回调 订单重复执行: orderid=%s", orderid.c_str());
+//		//LogInfoToFile("RechargeInfo", "充值异步回调 订单重复执行: orderid=%s", orderid.c_str());
 //		return false;//订单号存在
 //	}
 //	//g_FishServer.ShowInfoToWin("渠道服务器进行充值5");
@@ -303,7 +303,7 @@ bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string app, string cbi, strin
 //bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string orderid, string price, string ChannelCode, string channelOrderid, string channelLabel, string callbackInfo, string sign, string sign2, string version, string freePrice, string sdkCode)
 //{
 //	// string sign2, string version, string freePrice, string sdkCode
-//	LogInfoToFile("WmLogRechargeInfo.txt", "充值异步回调: orderid=%s, price=%s,freeprice=%s,version=%s,sdkCode=%s, ChannelCode=%s, channelOrderid =%s, channelLabel =%s, callbackInfo=%s, sign=%s ,sign2=%s", orderid.c_str(), price.c_str(), freePrice.c_str(), version.c_str(), sdkCode.c_str(), ChannelCode.c_str(), channelOrderid.c_str(), channelLabel.c_str(), callbackInfo.c_str(), sign.c_str(), sign2.c_str());
+//	LogInfoToFile("WmRechargeInfo", "充值异步回调: orderid=%s, price=%s,freeprice=%s,version=%s,sdkCode=%s, ChannelCode=%s, channelOrderid =%s, channelLabel =%s, callbackInfo=%s, sign=%s ,sign2=%s", orderid.c_str(), price.c_str(), freePrice.c_str(), version.c_str(), sdkCode.c_str(), ChannelCode.c_str(), channelOrderid.c_str(), channelLabel.c_str(), callbackInfo.c_str(), sign.c_str(), sign2.c_str());
 //
 //	//命令应该可以做到玩家所在的Center所在
 //	//CustParam 应该包含  UserID  /ShopID 
@@ -366,7 +366,7 @@ bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string app, string cbi, strin
 //	if (Md5Str2.compare(sign2) != 0)//验证签名是否正确
 //	{
 //		g_DBLogManager.LogUserRechargeLogToDB("运营服务器验证失败:MD5验证2失败", orderid, UserID, ChannelCode, channelOrderid, channelLabel, ShopItemID, dPrice, FreePrice, 0, 0, 0, 0, 0, SendLogDB);
-//		//LogInfoToFile("LogRechargeInfo.txt", "充值异步回调 订单失败 MD5校验失败: orderid=%s ChannelMD5=%s,ConfigMD5=%s", orderid.c_str(), sign.c_str(), Md5Str.c_str());
+//		//LogInfoToFile("RechargeInfo", "充值异步回调 订单失败 MD5校验失败: orderid=%s ChannelMD5=%s,ConfigMD5=%s", orderid.c_str(), sign.c_str(), Md5Str.c_str());
 //		return false;
 //	}
 //
@@ -386,7 +386,7 @@ bool UseRMBManager::OnHandleHttpInfoByUserRecharge(string app, string cbi, strin
 //	if (g_FishServer.GetOrderOnlyManager().IsExists(i64Value, OT_SDK))
 //	{
 //		g_DBLogManager.LogUserRechargeLogToDB("运营服务器验证失败:重复的订单", orderid, UserID, ChannelCode, channelOrderid, channelLabel, ShopItemID, dPrice, FreePrice, 0, 0, 0, 0, 0, SendLogDB);
-//		//LogInfoToFile("LogRechargeInfo.txt", "充值异步回调 订单重复执行: orderid=%s", orderid.c_str());
+//		//LogInfoToFile("RechargeInfo", "充值异步回调 订单重复执行: orderid=%s", orderid.c_str());
 //		return false;//订单号存在
 //	}
 //	//g_FishServer.ShowInfoToWin("渠道服务器进行充值5");

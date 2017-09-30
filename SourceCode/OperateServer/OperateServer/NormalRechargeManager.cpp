@@ -206,7 +206,7 @@ void NormalRechargeManager::OnHandleNormalRechargeInfo(string UrlStr)
 {
 	UrlStr = UrlDecode(UrlStr);
 
-	LogInfoToFile("LogRechargeInfo.txt", "普通充值异步回调: %s", UrlStr.c_str());
+	LogInfoToFile("RechargeInfo", "普通充值异步回调: %s", UrlStr.c_str());
 	//接收到字符串
 	if (UrlStr.length() == 0)
 	{
@@ -218,13 +218,13 @@ void NormalRechargeManager::OnHandleNormalRechargeInfo(string UrlStr)
 	if (BeginIndex == -1 || EndIndex == -1 || EndIndex <= BeginIndex)
 	{
 		ASSERT(false);
-		LogInfoToFile("LogRechargeInfo.txt", "普通充值异步回调 内容错误");
+		LogInfoToFile("RechargeInfo", "普通充值异步回调 内容错误");
 		return;
 	}
 	string transdata = UrlStr.substr(BeginIndex, EndIndex - BeginIndex + 1);
 	if (transdata.length() == 0)
 	{
-		LogInfoToFile("LogRechargeInfo.txt", "普通充值异步回调 具体数据为空");
+		LogInfoToFile("RechargeInfo", "普通充值异步回调 具体数据为空");
 		ASSERT(false);
 		return;
 	} 
@@ -245,7 +245,7 @@ void NormalRechargeManager::OnHandleNormalRechargeInfo(string UrlStr)
 		pMap.count(m_NormalRechargeCrcInfo.cporderidCrc) != 1
 		)
 	{
-		LogInfoToFile("LogRechargeInfo.txt", "普通充值异步回调 部分数据不存在");
+		LogInfoToFile("RechargeInfo", "普通充值异步回调 部分数据不存在");
 		ASSERT(false);
 		return;
 	}

@@ -81,7 +81,7 @@ bool PhoneSMSManager::HandleSMSEvent(PhoneSMSOnceInfo pEvent)
 	char strURL[20480];
 	sprintf_s(strURL, CountArray(strURL), "appkey=1b21fe6f50a42&phone=%lld&zone=%d&code=%d",pEvent.PhoneNumber,pEvent.Zone,pEvent.BindNumber);
 
-	LogInfoToFile("WmSmsLog.txt", "strURL=%s", strURL);
+	LogInfoToFile("WmSms", "strURL=%s", strURL);
 
 	//将字符串发送出去 Post
 	WORD RequestID = g_FishServer.GetPhoneSMSID();
@@ -142,18 +142,18 @@ void PhoneSMSManager::OnSendPhoneSMSResult(UINT64 ID, char* pData, DWORD Length)
 		return;
 	}
 
-	LogInfoToFile("WmSmsLog.txt", "pData=%s", pData);
+	LogInfoToFile("WmSms", "pData=%s", pData);
 
 
 	if (Length != 0 && strlen(pData) >= bSendPhoneVerificationNUmberSucessLength && _strnicmp(pData, sSendPhoneVerificationNumberSucess, bSendPhoneVerificationNUmberSucessLength) == 0)
 	{
-		LogInfoToFile("WmSmsLog.txt", "ok");
+		LogInfoToFile("WmSms", "ok");
 		HandleSMSResult(Iter->second, true);
 		m_SMSHandleMap.erase(Iter);
 	}
 	else
 	{
-		LogInfoToFile("WmSmsLog.txt", "error");
+		LogInfoToFile("WmSms", "error");
 		HandleSMSResult(Iter->second, false);
 		m_SMSHandleMap.erase(Iter);
 	}

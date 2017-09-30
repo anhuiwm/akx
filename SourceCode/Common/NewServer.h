@@ -88,7 +88,6 @@ public:
 	void		Shutdown();
 	void		SetCmdHandler(INetHandler *pHandler);
 	bool		Send(ServerClientData *pClient, NetCmd *pCmd);
-	//bool		SendJson(ServerClientData *pClient, NetCmd *pCmd);
 	UINT		JoinNum()const;
 	void		SwitchAccept(bool bEnable);
 

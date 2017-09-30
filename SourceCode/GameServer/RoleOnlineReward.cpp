@@ -58,6 +58,7 @@ void RoleOnlineReward::OnGetOnlineReward(CRoleEx* pRole,BYTE ID)
 	//3.发送命令到客户端去 玩家领取在线奖励成功了
 	msg.Result = true;
 	msg.States = pRole->GetRoleInfo().OnlineRewardStates;
+	msg.OnlineSec = pRole->GetRoleOnlineSec();
 	pRole->SendDataToClient(&msg);
 	return;
 }
@@ -112,7 +113,7 @@ void RoleOnlineReward::OnGetAllOnlineReward(CRoleEx* pRole)
 	HashMap<BYTE, tagOnceOnlienReward>::iterator Iter = g_FishServer.GetFishConfig().GetOnlineRewardConfig().m_OnlineRewardMap.begin();
 	vector<BYTE> vecID;
 	DWORD tempStatus = pRole->GetRoleInfo().OnlineRewardStates;
-	LogInfoToFile("WmOnline.txt", "OnGetAllOnlineReward::starttempStatus=%d", tempStatus);
+	//LogInfoToFile("WmOnline", "OnGetAllOnlineReward::starttempStatus=%d", tempStatus);
  	for(;Iter != g_FishServer.GetFishConfig().GetOnlineRewardConfig().m_OnlineRewardMap.end(); ++Iter)
 	{
 		BYTE ID = Iter->first;
@@ -140,9 +141,9 @@ void RoleOnlineReward::OnGetAllOnlineReward(CRoleEx* pRole)
 		tempStatus = tempStatus | (1 << (ID - 1));
 		//2.奖励发送完毕后设置标记 不多  所以每次都发
 		vecID.push_back(ID);
-		LogInfoToFile("WmOnline.txt", "OnGetAllOnlineReward::ID=%d", ID);
+		LogInfoToFile("WmOnline", "OnGetAllOnlineReward::ID=%d", ID);
 	}
-	LogInfoToFile("WmOnline.txt", "OnGetAllOnlineReward::endtempStatus=%d", tempStatus);
+	LogInfoToFile("WmOnline", "OnGetAllOnlineReward::endtempStatus=%d", tempStatus);
 	if (vecID.empty())
 	{
 		ASSERT(false);

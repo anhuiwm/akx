@@ -20,13 +20,13 @@ void IOSPayManager::OnSendOrderToIOSServer(DWORD dwUserID, string OrderInfo/*, b
 {
 	/*if (IsTest)
 	{
-		LogInfoToFile("LogRechargeInfo.txt", "IOS 沙盒测试充值 OrderInfo=%s", OrderInfo.c_str());
+		LogInfoToFile("RechargeInfo", "IOS 沙盒测试充值 OrderInfo=%s", OrderInfo.c_str());
 	}
 	else
 	{
-		LogInfoToFile("LogRechargeInfo.txt", "IOS 正式充值 OrderInfo=%s", OrderInfo.c_str());
+		LogInfoToFile("RechargeInfo", "IOS 正式充值 OrderInfo=%s", OrderInfo.c_str());
 	}*/
-	LogInfoToFile("LogRechargeInfo.txt", "IOS 正式充值 OrderInfo=%s", OrderInfo.c_str());
+	LogInfoToFile("RechargeInfo", "IOS 正式充值 OrderInfo=%s", OrderInfo.c_str());
 
 	AE_CRC_PAIRS pThree;
 	AECrc32(pThree, OrderInfo.c_str(), OrderInfo.length(), 0, 0x73373);
@@ -75,7 +75,7 @@ void IOSPayManager::OnSendOrderToIOSServer(DWORD dwUserID, string OrderInfo/*, b
 }
 void IOSPayManager::OnSendOrderToIOSResult(unsigned __int64 Order64ID, char* pData, DWORD Length)
 {
-	LogInfoToFile("LogRechargeInfo.txt", "IOS 返回数据 ", pData);
+	LogInfoToFile("RechargeInfo", "IOS 返回数据 ", pData);
 	HashMap<UINT64, IOSOrderInfo>::iterator Iter = m_Map.find(Order64ID);
 	if (Iter == m_Map.end())
 	{

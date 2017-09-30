@@ -243,9 +243,12 @@ void GameRobotManager::OnRoleCreateNormalRoom(GameTable* pTable)
 	multimap<DWORD, DWORD>::iterator Iter= g_FishServer.GetFishConfig().GetFishGameRobotConfig().RobotIndexMap.find(Key);
 	if (Iter == g_FishServer.GetFishConfig().GetFishGameRobotConfig().RobotIndexMap.end())
 		return;
-	
+	if (Iter->second == 0)//控制本类型房间是否进入机器人
+	{
+		return;
+	}
 	DWORD RobotNum = RandRange(0,2);//(RandUInt() % 99999) % 3;
-	if (RobotNum == 0) RandRange(0, 2);
+	//`if (RobotNum == 0) RandRange(0, 2);
 
 	for (DWORD i = 0; i < RobotNum; ++i)
 	{
@@ -314,9 +317,12 @@ void GameRobotManager::OnRoleJoinNormalRoom(GameTable* pTable)
 	if (Iter == g_FishServer.GetFishConfig().GetFishGameRobotConfig().RobotIndexMap.end())
 		return;
 	DWORD RobotID = Iter->second;
-
+	if (RobotID == 0)//控制本类型房间是否进入机器人
+	{
+		return;
+	}
 	DWORD RobotNum = RandRange(0, 2);//(RandUInt() % 99999) % 3;
-	if (RobotNum == 0) RandRange(0, 2);
+	//if (RobotNum == 0) RandRange(0, 2);
 
 	for (DWORD i = 0; i < RobotNum; ++i)
 	{
@@ -346,7 +352,10 @@ void GameRobotManager::OnMonthBeginSign(BYTE MonthID)
 	for (; IterFind != pair.second; ++IterFind)
 	{
 		DWORD RobotID = IterFind->second;
-
+		if (RobotID == 0)//控制本类型房间是否进入机器人
+		{
+			return;
+		}
 		HashMap<DWORD, tagGameRobotConfig>::iterator IterRobot = g_FishServer.GetFishConfig().GetFishGameRobotConfig().RobotMap.find(RobotID);
 		if (IterRobot == g_FishServer.GetFishConfig().GetFishGameRobotConfig().RobotMap.end())
 			return;
@@ -461,7 +470,10 @@ void GameRobotManager::UpdateWriteList()
 			if (IterFind == g_FishServer.GetFishConfig().GetFishGameRobotConfig().RobotIndexMap.end())
 				return;
 			DWORD RobotID = IterFind->second;
-
+			if (RobotID == 0)//控制本类型房间是否进入机器人
+			{
+				continue;
+			}
 			GameRobot* pRobot = GetFreeRobot(RobotID);
 			if (!pRobot)
 			{

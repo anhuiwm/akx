@@ -3094,6 +3094,7 @@ bool FishServer::HandleControlMsg(NetCmd* pCmd)
 			return true;
 		}
 		break;
+
 	case CL_ChangeParticularStates:
 		{
 			CL_Cmd_ChangeParticularStates*pMsg = (CL_Cmd_ChangeParticularStates*)pCmd;
@@ -3144,6 +3145,37 @@ bool FishServer::HandleControlMsg(NetCmd* pCmd)
 			return true;
 		}
 		break;
+	case CL_SetBlackList:
+	    {
+		    LC_CMD_SetFishBlackList* pMsg = (LC_CMD_SetFishBlackList*)pCmd;
+	    	if (!pMsg)
+	    	{
+	    		ASSERT(false);
+	    		return false;
+	    	}
+	    	CenterRole* pRole = GetRoleManager().QueryCenterUser(pMsg->dwUserID);
+	    	if (!pRole)
+	    		return false;
+	    	pRole->SendDataToGameServer(pMsg);
+	    	return true;
+	    }
+	    break;
+	case CL_UnSetBlackList:
+	   {
+		    LC_CMD_UnSetFishBlackList* pMsg = (LC_CMD_UnSetFishBlackList*)pCmd;
+	     	if (!pMsg)
+	     	{
+	     		ASSERT(false);
+	     		return false;
+	     	}
+	     	CenterRole* pRole = GetRoleManager().QueryCenterUser(pMsg->dwUserID);
+	     	if (!pRole)
+	     		return false;
+	     	pRole->SendDataToGameServer(pMsg);
+	     	return true;
+	   }
+	   break;
+
 	}
 	return true;
 }

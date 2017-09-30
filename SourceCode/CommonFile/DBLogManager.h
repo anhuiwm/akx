@@ -11,7 +11,8 @@ enum LogType
 	LT_Skill = 7,//技能
 	LT_Dial = 8,//森林舞会
 	LT_Car = 9,
-	LT_BULLET = 10,
+	LT_BULLET = 10,//黄金弹头
+	LT_NORMAL = 11,//其他物品
 };
 typedef void(SendMsgFun)(NetCmd* pCmd);
 
@@ -21,7 +22,7 @@ public:
 	DBLogManager();
 	virtual ~DBLogManager();
 	//道具的Log记录
-	void LogItemToDB(DWORD dwUserID, int ItemID, int ItemSum, int itemEndtime, const TCHAR *pcStr, SendMsgFun pSend);
+	void LogItemToDB(DWORD dwUserID, int ItemID, int ItemSum, int EndItemSum, const TCHAR *pcStr, SendMsgFun pSend);
 
 	//普通的Log记录
 	void LogToDB(DWORD dwUserID, LogType Type, int TypeSum,DWORD Param, const TCHAR *pcStr, SendMsgFun pSend);//玩家在游戏中的行为 最普遍的行为
@@ -48,6 +49,6 @@ public:
 	//记录转盘数据
 	void LogCarInfoToDB(DWORD BanderUserID, UINT64 AreaGlobel[MAX_CAR_ClientSum], BYTE ResultIndex, INT64 BrandGlobel, INT64 SystemGlobel, DWORD RoleSum, SendMsgFun pSend);
 
-	void LogStockScoreToDB(WORD ServerID, BYTE TableType, __int64 StockScore,SendMsgFun pSend);
+	void LogStockScoreToDB(WORD ServerID, BYTE TableType, __int64 StockScore,__int64 taxScore,SendMsgFun pSend);
 };
 extern DBLogManager g_DBLogManager;

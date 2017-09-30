@@ -245,7 +245,7 @@ bool HttpServer::SplitStr(HttpClientData *pc, UINT endSize, HttpRecvData &recvDa
 	const char *pstr = TEMP_STR + GET_COUNT;
 	const char *pstr_end = TEMP_STR + size;
 	
-	//LogInfoToFile("WmChargeCB.txt", "get::pc->IsPost=%d, pc->buff=%s, pc->requesturl=%s", pc->IsPost, pc->Buff, pc->RequestUrl);
+	//LogInfoToFile("WmChargeCB", "get::pc->IsPost=%d, pc->buff=%s, pc->requesturl=%s", pc->IsPost, pc->Buff, pc->RequestUrl);
 
 	//检查请求的地址
 	bool bFind = false;
@@ -402,7 +402,7 @@ void HttpServer::_RecvThread()
 				{
 					//内容已经收到;
 
-					LogInfoToFile("WmChargeCB.txt", "pc->IsPost=%d,  pc->requesturl=%s", pc->IsPost,pc->RequestUrl);
+					//LogInfoToFile("WmChargeCB", "pc->IsPost=%d,  pc->requesturl=%s", pc->IsPost,pc->RequestUrl);
 
 					HttpRecvData rd;
 					if (pc->IsPost)

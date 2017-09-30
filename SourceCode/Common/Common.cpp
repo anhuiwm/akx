@@ -175,6 +175,7 @@ const int TRANS_COUNT = strlen(TRANS_BEGIN);
 const char *SIGN_STR = "sign=";
 const int SIGN_COUNT = strlen(SIGN_STR);
 const UINT SIGN_CRC = AECrc32("sign", 4, 0);
+BYTE g_ServerID = 0;
 bool SplitStrByIpay(const char *pcstr, UINT size, HashMap<UINT, std::string> & strList)
 {
 	const char *pcend = pcstr + size;

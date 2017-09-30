@@ -46,7 +46,7 @@ bool FishServer::InitServer()
 	}
 
 	m_MiniGameServerID = pConfig->NetworkID;
-
+	g_ServerID = m_MiniGameServerID;
 	if (!m_NiuNiuManager.OnInit())
 	{
 		ASSERT(false);

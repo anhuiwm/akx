@@ -338,7 +338,7 @@ void NewServer::_ThreadSendTCP()
 				NetCmd *pcmd = pc->SendList.GetItemNoRemove();
 				
 				int ret = send(pc->Socket, (char*)pcmd, pcmd->GetCmdSize(), 0);
-				printf("1: %d", ret);
+				printf("send ret: %d", ret);
 				if (pcmd->GetCmdSize() == 13)
 				{
 				

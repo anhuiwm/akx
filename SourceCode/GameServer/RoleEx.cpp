@@ -106,7 +106,7 @@ bool CRoleEx::OnInit(tagRoleInfo* pUserInfo, tagRoleServerInfo* pRoleServerInfo,
 		ChangeRoleSendBronzeBulletNum(m_RoleInfo.SendBronzeBulletNum * -1);
 		if (!IsOnceWeekOnline())
 		{
-			LogInfoToFile("WmDay.txt", "userID=%d  !IsOnceWeekOnline() OnInit", GetUserID());
+			LogInfoToFile("WmDay", "userID=%d  !IsOnceWeekOnline() OnInit", GetUserID());
 			ChangeRoleWeekClobeNum(m_RoleInfo.WeekGlobeNum * -1, true, true);
 		}
 	}
@@ -160,33 +160,33 @@ bool CRoleEx::OnInit(tagRoleInfo* pUserInfo, tagRoleServerInfo* pRoleServerInfo,
 }
 bool CRoleEx::IsLoadFinish()
 {
-	LogInfoToFile("WmLogon.txt", "userID=%d\
-		m_RelationManager =%d\
-		m_ItemManager=%d\
-		m_MailManager=%d\
-		m_RoleTask=%d\
-		m_RoleAchievement=%d\
-		m_RoleTitleManager=%d\
-		m_RoleIDEntity=%d\
-		m_RoleActionManager=%d\
-		m_RoleGiffManager=%d\
-		m_RoleGameData=%d\
-		m_RoleCharManger=%d\
-		m_RoleRelationRequest=%d"\
-		, GetUserID(),
-		m_RelationManager.IsLoadDB() ,
-		m_ItemManager.IsLoadDB() ,
-		m_MailManager.IsLoadDB() ,
-		m_RoleTask.IsLoadDB() ,
-		m_RoleAchievement.IsLoadDB() ,
-		m_RoleTitleManager.IsLoadDB() ,
-		m_RoleIDEntity.IsLoadDB() ,
-		m_RoleActionManager.IsLoadDB() ,
-		m_RoleGiffManager.IsLoadDB() ,
-		m_RoleGameData.IsLoadDB() ,
-		m_RoleCharManger.IsLoadDB() ,
-		m_RoleRelationRequest.IsLoadDB()
-	);
+	////LogInfoToFile("WmLogon", "userID=%d\
+	//	m_RelationManager =%d\
+	//	m_ItemManager=%d\
+	//	m_MailManager=%d\
+	//	m_RoleTask=%d\
+	//	m_RoleAchievement=%d\
+	//	m_RoleTitleManager=%d\
+	//	m_RoleIDEntity=%d\
+	//	m_RoleActionManager=%d\
+	//	m_RoleGiffManager=%d\
+	//	m_RoleGameData=%d\
+	//	m_RoleCharManger=%d\
+	//	m_RoleRelationRequest=%d"\
+	//	, GetUserID(),
+	//	m_RelationManager.IsLoadDB() ,
+	//	m_ItemManager.IsLoadDB() ,
+	//	m_MailManager.IsLoadDB() ,
+	//	m_RoleTask.IsLoadDB() ,
+	//	m_RoleAchievement.IsLoadDB() ,
+	//	m_RoleTitleManager.IsLoadDB() ,
+	//	m_RoleIDEntity.IsLoadDB() ,
+	//	m_RoleActionManager.IsLoadDB() ,
+	//	m_RoleGiffManager.IsLoadDB() ,
+	//	m_RoleGameData.IsLoadDB() ,
+	//	m_RoleCharManger.IsLoadDB() ,
+	//	m_RoleRelationRequest.IsLoadDB()
+	//);
 
 	if (
 		m_RelationManager.IsLoadDB() &&
@@ -359,8 +359,8 @@ void CRoleEx::ChangeRoleSocketID(DWORD SocketID)
 void CRoleEx::OnUserLoadFinish(bool IsLogonGameServer)//当当前对象加载完毕的时候
 {
 	m_LogonTime = time(NULL);
-	LogInfoToFile("WmLogon.txt", "OnUserLoadFinish::userID=%d"
-		, m_RoleInfo.dwUserID);
+	//LogInfoToFile("WmLogon", "OnUserLoadFinish::userID=%d"
+	//	, m_RoleInfo.dwUserID);
 
 	g_FishServer.GetRoleLogonManager().OnDleRoleOnlyInfo(m_RoleInfo.dwUserID);//玩家登陆成功的时候 删除玩家在Logon上保存的唯一码
 
@@ -430,7 +430,7 @@ void CRoleEx::OnUserLoadFinish(bool IsLogonGameServer)//当当前对象加载完毕的时候
 			SetMsgInfo(msg, GetMsgType(Main_Logon, LC_AccountOnlyIDSuccess), sizeof(LC_Cmd_AccountOnlyIDSuccess));
 			msg.RandID = g_FishServer.GetRoleLogonManager().OnAddRoleOnlyInfo(m_RoleInfo.dwUserID);//将玩家添加到唯一编码里面去
 			msg.RoleInfo = m_RoleInfo;
-			LogInfoToFile("WmLogon.txt", "Success 1m_RoleInfo.dwUserID=%d, m_LastOnLineTime=%d, m_LogonTime=%d ", m_RoleInfo.dwUserID, m_LastOnLineTime, m_LogonTime);
+			//LogInfoToFile("WmLogon", "Success 1m_RoleInfo.dwUserID=%d, m_LastOnLineTime=%d, m_LogonTime=%d ", m_RoleInfo.dwUserID, m_LastOnLineTime, m_LogonTime);
 			msg.OperateIp = g_FishServer.GetOperateIP();
 			SendDataToClient(&msg);
 		}
@@ -440,7 +440,7 @@ void CRoleEx::OnUserLoadFinish(bool IsLogonGameServer)//当当前对象加载完毕的时候
 		if (IsLogonGameServer)
 			ResetClientInfo();
 
-		LogInfoToFile("WmLogon.txt", "Success 2m_RoleInfo.dwUserID=%d, m_LastOnLineTime=%d, m_LogonTime=%d ", m_RoleInfo.dwUserID, m_LastOnLineTime, m_LogonTime);
+		//LogInfoToFile("WmLogon", "Success 2m_RoleInfo.dwUserID=%d, m_LastOnLineTime=%d, m_LogonTime=%d ", m_RoleInfo.dwUserID, m_LastOnLineTime, m_LogonTime);
 		//前往大厅
 		LC_Cmd_AccountOnlyIDSuccess msg;
 		SetMsgInfo(msg, GetMsgType(Main_Logon, LC_AccountOnlyIDSuccess), sizeof(LC_Cmd_AccountOnlyIDSuccess));
@@ -586,6 +586,7 @@ void CRoleEx::SendUserLeaveToCenter()
 	SetMsgInfo(msg,GetMsgType(Main_Center, CL_Sub_UserLeave), sizeof(CL_UserLeave));
 	msg.dwUserID = m_RoleInfo.dwUserID;
 	SendDataToCenter(&msg);
+	LogInfoToFile("WmLeave.txt", " dwUserID=%d", msg.dwUserID);
 }
 void CRoleEx::SendDataToCenter(NetCmd* pCmd)
 {
@@ -901,8 +902,8 @@ bool CRoleEx::ChangeRoleGlobe(int AddGlobe, bool IsSendToClient, bool IsSaveToDB
 
 	int tcatch = IsCatchFish == true ? 1 : 0;
 	int tsend = IsSendToClient ? 1 : 0;
-    LogInfoToFile("WmGoldLog.txt", "%d  AddGlobe:%d  GlobeNum:%d ", this->GetUserID(), AddGlobe, m_RoleInfo.dwGlobeNum);
-	LogInfoToFile("WmGoldLog.txt", "SendClient=%d CatchFish=%d",tsend, tcatch);
+    LogInfoToFile("WmGold", "%d  AddGlobe:%d  GlobeNum:%d ", this->GetUserID(), AddGlobe, m_RoleInfo.dwGlobeNum);
+	LogInfoToFile("WmGold", "SendClient=%d CatchFish=%d",tsend, tcatch);
 	OnHandleEvent(true, true, true, ET_MaxGlobelSum, 0, (m_RoleInfo.dwGlobeNum>0xffffffff ? 0xffffffff : m_RoleInfo.dwGlobeNum));
 
 	if (IsSendToClient /*|| !IsCatchFish*/)
@@ -1113,13 +1114,13 @@ bool  CRoleEx::ChangeRoleSendSilverBulletNum(int BulletNum)
 {
 	if (BulletNum == 0)
 		return true;
-	if (!CheckChangeDWORDValue(m_RoleInfo.SendGoldBulletNum, BulletNum))
+	if (!CheckChangeDWORDValue(m_RoleInfo.SendSilverBulletNum, BulletNum))
 		return false;
 	m_RoleInfo.SendSilverBulletNum += BulletNum;
 
 	LC_Cmd_ChangeRoleSendSilverBulletNum msg;
 	SetMsgInfo(msg, GetMsgType(Main_Role, LC_ChangeSendSilverBulletNum), sizeof(LC_Cmd_ChangeRoleSendSilverBulletNum));
-	msg.Num = m_RoleInfo.SendGoldBulletNum;
+	msg.Num = m_RoleInfo.SendSilverBulletNum;
 	SendDataToClient(&msg);//只发送客户端去
 
 	DBR_Cmd_SaveRoleSendSilverBulletNum msgDB;
@@ -1143,7 +1144,7 @@ bool  CRoleEx::ChangeRoleSendBronzeBulletNum(int BulletNum)
 	m_RoleInfo.SendBronzeBulletNum += BulletNum;
 
 	LC_Cmd_ChangeRoleSendBronzeBulletNum msg;
-	SetMsgInfo(msg, GetMsgType(Main_Role, LC_ChangeSendSilverBulletNum), sizeof(LC_Cmd_ChangeRoleSendBronzeBulletNum));
+	SetMsgInfo(msg, GetMsgType(Main_Role, LC_ChangeSendBronzeBulletNum), sizeof(LC_Cmd_ChangeRoleSendBronzeBulletNum));
 	msg.Num = m_RoleInfo.SendBronzeBulletNum;
 	SendDataToClient(&msg);//只发送客户端去
 
@@ -1550,16 +1551,17 @@ bool CRoleEx::ChangeRoleActionStates(BYTE Index, bool States)
 }
 bool CRoleEx::ChangeRoleOnlineRewardStates(DWORD States)
 {
-	if (m_RoleInfo.OnlineRewardStates == States)
-		return true;
+	//if (m_RoleInfo.OnlineRewardStates == States)
+	//	return true;
 	m_RoleInfo.OnlineRewardStates = States;
-
+	LogInfoToFile("WmOnline", "OnGetAllOnlineReward::m_RoleInfo.OnlineRewardStates=%d", m_RoleInfo.OnlineRewardStates);
 	GetRoleMessageStates().OnChangeRoleMessageStates(RMT_Online);
 
 	//发送命令到客户端去
 	LC_Cmd_ChangeRoleOnlineRewardStates msg;
 	SetMsgInfo(msg, GetMsgType(Main_Role, LC_ChangeRoleOnlineRewardStates), sizeof(LC_Cmd_ChangeRoleOnlineRewardStates));
 	msg.States = m_RoleInfo.OnlineRewardStates;
+	msg.OnlineSec = GetRoleOnlineSec();
 	SendDataToClient(&msg);
 
 
@@ -1702,10 +1704,10 @@ bool CRoleEx::ChangeRoleIsOnline(bool States)
 		msgMini.dwUserID = GetUserID();
 		g_FishServer.SendNetCmdToMiniGame(&msgMini);*/
 
-		//GM_Cmd_RoleLeaveMiniGame msgLeave;
-		//SetMsgInfo(msgLeave, GetMsgType(Main_MiniGame, GM_RoleLeaveMiniGame), sizeof(GM_Cmd_RoleLeaveMiniGame));
-		//msgLeave.dwUserID = GetUserID();
-		//g_FishServer.SendNetCmdToMiniGame(&msgLeave);
+		GM_Cmd_RoleLeaveMiniGame msgLeave;
+		SetMsgInfo(msgLeave, GetMsgType(Main_MiniGame, GM_RoleLeaveMiniGame), sizeof(GM_Cmd_RoleLeaveMiniGame));
+		msgLeave.dwUserID = GetUserID();
+		g_FishServer.SendNetCmdToMiniGame(&msgLeave);
 
 		DBR_Cmd_TableChange msgDB;//记录玩家进入
 		SetMsgInfo(msgDB, DBR_TableChange, sizeof(DBR_Cmd_TableChange));
@@ -1756,6 +1758,16 @@ bool CRoleEx::ChangeRoleExChangeStates(DWORD States)
 	g_FishServer.SendNetCmdToSaveDB(&msgDB);
 	return true;
 }
+
+void CRoleEx::ChangeRechargeRatioSum(DWORD AddSum)
+{
+	if (AddSum > 0)
+	{
+		m_RechargeRatioSum = AddSum;
+		m_LastRechargeRatioTime = time(0) + g_FishServer.GetTableManager()->GetGameConfig()->RechargeTimeSec(AddSum);
+	}
+}
+
 bool CRoleEx::ChangeRoleTotalRechargeSum(DWORD AddSum)
 {
 	if (AddSum == 0)
@@ -1775,6 +1787,8 @@ bool CRoleEx::ChangeRoleTotalRechargeSum(DWORD AddSum)
 	SendDataToClient(&msg);
 
 	GetRoleVip().OnRechargeRMBChange();//当玩家充值变化的时候 进行处理
+
+	ChangeRechargeRatioSum(AddSum);
 	return true;
 }
 
@@ -2627,7 +2641,7 @@ void CRoleEx::UpdateByMin(bool IsHourChange, bool IsDayChange, bool IsWeekChange
 	if (IsDayChange)
 	{
 		m_IsNeedSave = true;
-		LogInfoToFile("WmDay.txt", "userID=%d   IsDayChange UpdateByMin", GetUserID());
+		LogInfoToFile("WmDay", "userID=%d   IsDayChange UpdateByMin", GetUserID());
 		SendLoginReward();
 		ChangeRoleSendGoldBulletNum(m_RoleInfo.SendGoldBulletNum * -1);
 		ChangeRoleSendSilverBulletNum(m_RoleInfo.SendSilverBulletNum * -1);
@@ -2670,7 +2684,7 @@ void CRoleEx::UpdateByMin(bool IsHourChange, bool IsDayChange, bool IsWeekChange
 
 	if (IsWeekChange)
 	{
-		LogInfoToFile("WmDay.txt", "userID=%d   IsWeekChange UpdateByMin", GetUserID());
+		LogInfoToFile("WmDay", "userID=%d   IsWeekChange UpdateByMin", GetUserID());
 		ChangeRoleWeekClobeNum(m_RoleInfo.WeekGlobeNum * -1, true, true);
 		m_RoleTask.OnWeekChange();	//任务无须按天进行更新 特殊情况 
 		//ChangeRoleCheckData(0);//清空签到数据
@@ -2867,6 +2881,10 @@ bool CRoleEx::SaveAllRoleInfo(bool IsExit)
 	if (IsExit)
 	{
 		//g_FishServer.ShowInfoToWin("玩家进行离线保存");
+	}
+	if (IsRobot())//机器人数据不存库
+	{
+		return true;
 	}
 	//std::cout << "玩家 数据进行保存\n";
 	//保存玩家的全部的数据

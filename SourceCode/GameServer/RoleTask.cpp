@@ -933,12 +933,12 @@ void RoleTaskBase::OnHandleEvent(BYTE EventID, DWORD BindParam, DWORD Param)
 
 		//if (Iter->second.Sign == DAY_TASK)
 		//{
-		//	m_pRole->GetRoleMessageStates().OnChangeRoleMessageStates(RMT_Task);
+		m_pRole->GetRoleMessageStates().OnChangeRoleMessageStates(RMT_Task);
 		//	m_pRole->ChangeRoleDayTaskActiviness(Iter->second.Activeness);
 		//}
 		//else if (Iter->second.Sign == WEEK_TASK)
 		//{
-		//	m_pRole->GetRoleMessageStates().OnChangeRoleMessageStates(RMT_WeekTask);
+		m_pRole->GetRoleMessageStates().OnChangeRoleMessageStates(RMT_WeekTask);
 		//	m_pRole->ChangeRoleWeekTaskActiviness(Iter->second.Activeness);
 		//}
 

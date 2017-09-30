@@ -55,6 +55,11 @@ bool FishServer::InitServer()
 		ASSERT(false);
 		return false;
 	}
+	if (!g_FishServerConfig.GetFTPServerConfig())
+	{
+		ASSERT(false);
+		return false;
+	}
 	m_FtpNetworkID = g_FishServerConfig.GetFTPServerConfig()->NetworkID;
 
 	//1.判断FTP 路径是否存在 不存在的话 关闭FTP服务器
@@ -215,7 +220,7 @@ bool FishServer::OnDestroy()
 	}
 	return true;
 }
-uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize, char* resData)
+uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize)
 {
 	//中央服务器只有在FTP 和 DB都连接成功后才工作
 	if (SeverID == m_FtpNetworkID)
@@ -542,14 +547,14 @@ bool FishServer::HandleGameServerMsg(ServerClientData* pClient, NetCmd* pCmd)
 				fwrite(pMsg->ImgData, 1, pMsg->ImgSize, pFile);
 				fclose(pFile);
 				//cout << "" << dir << endl;
-				LogInfoToFile("FTPFileSaveLog.txt", "文件保存成功: %s", dir);
+				LogInfoToFile("WmSaveFile", "保存成功: %s", dir);
 			}
 			else
 			{
 				ASSERT(false);
 				return false;
 				//cout << "*文件保存失败:" << dir << endl;
-				LogInfoToFile("FTPFileSaveLog.txt", "文件保存失败: %s", dir);
+				LogInfoToFile("WmSaveFile", "保存失败: %s", dir);
 			}
 
 			FG_Cmd_SaveImageData msg;
@@ -649,7 +654,7 @@ bool FishServer::HandleGameServerMsg(ServerClientData* pClient, NetCmd* pCmd)
 				free(Iter->second.FileData);
 				m_FileArray.erase(Iter);
 
-				LogInfoToFile("FTPFileSaveLog.txt", "图片文件保存成功: %s", dir);
+				LogInfoToFile("WmSaveFile", "保存成功: %s", dir);
 			}
 			return true;
 		}
