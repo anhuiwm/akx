@@ -179,15 +179,15 @@ bool FishServer::InitServer(int Index)
 				break;
 		}
 	}
-	if (!ConnectMiniGame())
-	{
-		while (true)
-		{
-			Sleep(5);
-			if (ConnectMiniGame())
-				break;
-		}
-	}
+	//if (!ConnectMiniGame())
+	//{
+	//	while (true)
+	//	{
+	//		Sleep(5);
+	//		if (ConnectMiniGame())
+	//			break;
+	//	}
+	//}
 	if (!ConnectClient())
 	{
 		ASSERT(false);
@@ -544,7 +544,7 @@ bool FishServer::ConnectClient()
 	
 	return true;
 }
-uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize)
+uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize, char* resData)
 {
 	//中央服务器只有在FTP 和 DB都连接成功后才工作
 	bool IsNeed = m_DBTcp.IsConnected() && m_CenterTcp.IsConnected() && m_OperatorTcp.IsConnected() && m_DBSaveTcp.IsConnected() & m_DBLogTcp.IsConnected() && m_FtpTcp.IsConnected();

@@ -1,6 +1,6 @@
 #pragma once
 #define MAX_THREAD_NUM		16
-#define ACCEPT_BUFF_SIZE	128
+#define ACCEPT_BUFF_SIZE	512
 struct UDPClientData : ServerClientData
 {
 	UDPClientData(UINT nSendCount, UINT nRecvCount) :SendList(nSendCount), ServerClientData(nRecvCount)

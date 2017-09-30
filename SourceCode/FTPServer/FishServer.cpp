@@ -220,7 +220,7 @@ bool FishServer::OnDestroy()
 	}
 	return true;
 }
-uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize)
+uint FishServer::CanConnected(BYTE SeverID, uint ip, short port, void *pData, uint recvSize, char* resData)
 {
 	//中央服务器只有在FTP 和 DB都连接成功后才工作
 	if (SeverID == m_FtpNetworkID)

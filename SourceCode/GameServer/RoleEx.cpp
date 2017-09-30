@@ -1704,10 +1704,10 @@ bool CRoleEx::ChangeRoleIsOnline(bool States)
 		msgMini.dwUserID = GetUserID();
 		g_FishServer.SendNetCmdToMiniGame(&msgMini);*/
 
-		GM_Cmd_RoleLeaveMiniGame msgLeave;
-		SetMsgInfo(msgLeave, GetMsgType(Main_MiniGame, GM_RoleLeaveMiniGame), sizeof(GM_Cmd_RoleLeaveMiniGame));
-		msgLeave.dwUserID = GetUserID();
-		g_FishServer.SendNetCmdToMiniGame(&msgLeave);
+		//GM_Cmd_RoleLeaveMiniGame msgLeave;
+		//SetMsgInfo(msgLeave, GetMsgType(Main_MiniGame, GM_RoleLeaveMiniGame), sizeof(GM_Cmd_RoleLeaveMiniGame));
+		//msgLeave.dwUserID = GetUserID();
+		//g_FishServer.SendNetCmdToMiniGame(&msgLeave);
 
 		DBR_Cmd_TableChange msgDB;//记录玩家进入
 		SetMsgInfo(msgDB, DBR_TableChange, sizeof(DBR_Cmd_TableChange));

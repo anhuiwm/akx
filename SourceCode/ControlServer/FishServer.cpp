@@ -41,6 +41,7 @@ bool FishServer::InitServer()
 	m_ControlClientNetworkID = pConfig->ControlClientNetworkID;
 	m_ControlID = pConfig->ControlID;
 	m_ControlRankValue = pConfig->ControlClientPassword;
+	g_ServerID = m_ControlID;
 	if (!ConnectControlServer())
 	{
 		while (true)
@@ -179,7 +180,7 @@ bool FishServer::ConnectHttp()
 	//添加处理命令
 
 	//支付易接回调
-	pHttpInitData.AddWebAddr(HT_GM, "gm_command_cl.clkj?", "SUCCESS", true, "type,id,num");//,sign2,version,freePrice,sdkCode 可选参数
+	pHttpInitData.AddWebAddr(HT_GM, "gm_command_cl.clkj?", "SUCCESS", true, "type,id,num,sign");//,sign2,version,freePrice,sdkCode 可选参数
 	if (!m_HttpServer.Init(pHttpInitData))
 	{
 		ShowInfoToWin("Http服务器启动失败");
@@ -535,7 +536,7 @@ bool FishServer::HandleHttpMsg(HttpRecvData* pHttpData)
 		bool Result = m_GmManager.OnHandleHttpInfoByGm(
 			pHttpData->KeyValues[m_GmManager.GetGmCrcInfo().type], pHttpData->KeyValues[m_GmManager.GetGmCrcInfo().id],
 			pHttpData->KeyValues[m_GmManager.GetGmCrcInfo().num], pHttpData->KeyValues[m_GmManager.GetGmCrcInfo().content],
-			pHttpData->KeyValues[m_GmManager.GetGmCrcInfo().target]
+			pHttpData->KeyValues[m_GmManager.GetGmCrcInfo().target], pHttpData->KeyValues[m_GmManager.GetGmCrcInfo().sign]
 		);
 			return Result;
 
