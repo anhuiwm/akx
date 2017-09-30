@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PhonePayManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 #include "..\CommonFile\DBLogManager.h"
 #include "..\CommonFile\DBLogManager.h"

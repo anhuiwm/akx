@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "RealNameVerificationManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 RealNameVerificationManager::RealNameVerificationManager()
 {
 

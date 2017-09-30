@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "GmManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 extern void SendLogDB(NetCmd* pCmd);
 GmManager::GmManager()

@@ -1,23 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
-    </Filter>
-    <Filter Include="头文件\Role">
-      <UniqueIdentifier>{d427e1ae-6604-4d15-961d-bc251b9406cc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Role">
-      <UniqueIdentifier>{b03def37-fa8d-4959-9246-528b1eb75927}</UniqueIdentifier>
     </Filter>
     <Filter Include="FishLogic">
       <UniqueIdentifier>{2ffd6844-c081-4672-aab0-49f7cbf61696}</UniqueIdentifier>
@@ -25,28 +11,42 @@
     <Filter Include="FishLogic\FishScene">
       <UniqueIdentifier>{b6a28881-1fee-49c3-b49e-77d122e0cab7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="TinyXml">
-      <UniqueIdentifier>{06d8ad93-2811-4c97-9863-a6002575ff90}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GameRobot">
       <UniqueIdentifier>{137f29c3-c0a9-4c7c-a2f2-681b33740b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tinyxml">
+      <UniqueIdentifier>{06d8ad93-2811-4c97-9863-a6002575ff90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inc">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="inc\Role">
+      <UniqueIdentifier>{d427e1ae-6604-4d15-961d-bc251b9406cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="src\Role">
+      <UniqueIdentifier>{b03def37-fa8d-4959-9246-528b1eb75927}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameServer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="FishServer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="UserLogonManager.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="RoleManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="FishLogic\FishScene\Bullet.cpp">
       <Filter>FishLogic\FishScene</Filter>
@@ -112,162 +112,162 @@
       <Filter>FishLogic</Filter>
     </ClCompile>
     <ClCompile Include="SkillInfo.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="FishTimer.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="GameTable.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="TableManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="EventManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleEx.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="Role.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleOnlineReward.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="ShopManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleAchievement.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleAction.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleCheck.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleChest.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleGiff.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleIdEntity.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleItemManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleMailManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleMonth.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleRelation.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleTask.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleTitleManager.cpp">
-      <Filter>源文件\Role</Filter>
-    </ClCompile>
-    <ClCompile Include="..\CommonFile\FishConfig.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="..\CommonFile\tinyxml\tinyxml2.cpp">
-      <Filter>TinyXml</Filter>
+      <Filter>tinyxml</Filter>
     </ClCompile>
     <ClCompile Include="..\CommonFile\tinyxml\XmlReader.cpp">
-      <Filter>TinyXml</Filter>
+      <Filter>tinyxml</Filter>
     </ClCompile>
     <ClCompile Include="RoleFtpManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="..\CommonFile\FishServerConfig.cpp">
-      <Filter>源文件\Role</Filter>
-    </ClCompile>
-    <ClCompile Include="FishLogic\Config.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleGameData.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="FishPackageManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleCache.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleLogonManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleLauncherManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="AnnouncementManager.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="RoleRank.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleMessageStates.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleQueueManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="ExChangeManager.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="RoleProtect.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="..\CommonFile\DBLogManager.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="LotteryManager.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="RoleVip.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleMonthCard.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleRate.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleCharManager.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="RoleRelationRequest.cpp">
-      <Filter>源文件\Role</Filter>
+      <Filter>src\Role</Filter>
     </ClCompile>
     <ClCompile Include="GameRobot.cpp">
       <Filter>GameRobot</Filter>
     </ClCompile>
+    <ClCompile Include="FishLogic\ExtConfig.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CommonFile\Config.cpp">
+      <Filter>src\Role</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="FishServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="UserLogonManager.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="RoleManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleEx.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="FishLogic\FishScene\Bullet.h">
       <Filter>FishLogic\FishScene</Filter>
@@ -336,145 +336,145 @@
       <Filter>FishLogic</Filter>
     </ClInclude>
     <ClInclude Include="SkillInfo.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="FishTimer.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="GameTable.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="TableManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="EventManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="FishLogic\NetCmd.h">
       <Filter>FishLogic</Filter>
     </ClInclude>
     <ClInclude Include="Role.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleOnlineReward.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="ShopManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleAchievement.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleAction.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleCheck.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleChest.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleGiff.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleIdEntity.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleItemManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleMailManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleMonth.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleRelation.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleTask.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleTitleManager.h">
-      <Filter>头文件\Role</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CommonFile\FishConfig.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="..\CommonFile\tinyxml\tinyxml2.h">
-      <Filter>TinyXml</Filter>
+      <Filter>tinyxml</Filter>
     </ClInclude>
     <ClInclude Include="..\CommonFile\tinyxml\XmlReader.h">
-      <Filter>TinyXml</Filter>
+      <Filter>tinyxml</Filter>
     </ClInclude>
     <ClInclude Include="RoleFtpManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="..\CommonFile\FishServerConfig.h">
-      <Filter>头文件\Role</Filter>
-    </ClInclude>
-    <ClInclude Include="FishLogic\Config.h">
-      <Filter>头文件</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleGameData.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="FishPackageManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleCache.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="..\CommonFile\ip.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="RoleLogonManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleLauncherManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="AnnouncementManager.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="RoleRank.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleMessageStates.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleQueueManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="ExChangeManager.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="RoleProtect.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="..\CommonFile\DBLogManager.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="LotteryManager.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="RoleVip.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleMonthCard.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleRate.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleCharManager.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="RoleRelationRequest.h">
-      <Filter>头文件\Role</Filter>
+      <Filter>inc\Role</Filter>
     </ClInclude>
     <ClInclude Include="GameRobot.h">
       <Filter>GameRobot</Filter>
+    </ClInclude>
+    <ClInclude Include="FishLogic\ExtConfig.h">
+      <Filter>inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CommonFile\Config.h">
+      <Filter>inc\Role</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

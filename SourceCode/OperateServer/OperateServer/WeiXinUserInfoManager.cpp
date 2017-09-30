@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "WeiXinUserInfoManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 #include "..\CommonFile\json/json.h"
 WeiXinUserInfoManager::WeiXinUserInfoManager()

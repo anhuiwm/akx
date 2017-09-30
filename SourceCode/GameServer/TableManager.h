@@ -7,7 +7,7 @@
 #include "GameTable.h"
 #include "RoleManager.h"
 #include "RoleEx.h"
-#include"FishLogic\Config.h"
+#include"FishLogic\ExtConfig.h"
 
 
 struct  GoldPool

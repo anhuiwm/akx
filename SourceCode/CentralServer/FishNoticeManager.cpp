@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "FishNoticeManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 FishNoticeManager::FishNoticeManager()
 {
 

@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "RankManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #define RankFilePath "xml\\"
 RankManager::RankManager()
 {

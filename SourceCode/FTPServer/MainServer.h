@@ -1,6 +1,6 @@
 //Ftp 只需要连接到GameServer就可以了 无须连接到DB去
 #pragma once
-#include "..\CommonFile\FishConfig.h"
+#include "..\CommonFile\Config.h"
 struct TempFileData
 {
 	DWORD		FileSize;

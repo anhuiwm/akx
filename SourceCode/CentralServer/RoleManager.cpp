@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "RoleManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 CenterRoleManager::CenterRoleManager()
 {
 	m_LeaveOnlineUser = 0;

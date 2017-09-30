@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 
 void print_json(Json::Value& data)

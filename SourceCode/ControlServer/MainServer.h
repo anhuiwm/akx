@@ -1,5 +1,5 @@
 #pragma once
-#include "..\CommonFile\FishConfig.h"
+#include "..\CommonFile\Config.h"
 #include "GmManager.h"
 enum HttpType
 {

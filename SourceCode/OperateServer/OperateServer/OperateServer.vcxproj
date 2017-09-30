@@ -14,6 +14,7 @@
     <ProjectGuid>{9FB614B2-2F9E-45F4-AB3F-207B9F15F209}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>OperateServer</RootNamespace>
+    <ProjectName>platform_server</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -100,8 +101,8 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\CommonFile\Config.h" />
     <ClInclude Include="..\..\CommonFile\DBLogManager.h" />
-    <ClInclude Include="..\..\CommonFile\FishConfig.h" />
     <ClInclude Include="..\..\CommonFile\FishServerConfig.h" />
     <ClInclude Include="..\..\CommonFile\tinyxml\tinyxml2.h" />
     <ClInclude Include="..\..\CommonFile\tinyxml\XmlReader.h" />
@@ -109,7 +110,7 @@
     <ClInclude Include="BindPhoneManager.h" />
     <ClInclude Include="BuyEntityItemManager.h" />
     <ClInclude Include="ChannelLogonManager.h" />
-    <ClInclude Include="FishServer.h" />
+    <ClInclude Include="MainServer.h" />
     <ClInclude Include="IApppay\CryptHelper.h" />
     <ClInclude Include="IApppay\SignUtils.h" />
     <ClInclude Include="IOSPayManager.h" />
@@ -128,8 +129,8 @@
     <ClInclude Include="WeiXinUserInfoManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\CommonFile\Config.cpp" />
     <ClCompile Include="..\..\CommonFile\DBLogManager.cpp" />
-    <ClCompile Include="..\..\CommonFile\FishConfig.cpp" />
     <ClCompile Include="..\..\CommonFile\FishServerConfig.cpp" />
     <ClCompile Include="..\..\CommonFile\tinyxml\tinyxml2.cpp" />
     <ClCompile Include="..\..\CommonFile\tinyxml\XmlReader.cpp" />
@@ -137,7 +138,7 @@
     <ClCompile Include="BindPhoneManager.cpp" />
     <ClCompile Include="BuyEntityItemManager.cpp" />
     <ClCompile Include="ChannelLogonManager.cpp" />
-    <ClCompile Include="FishServer.cpp" />
+    <ClCompile Include="MainServer.cpp" />
     <ClCompile Include="IApppay\CryptHelper.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>

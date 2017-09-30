@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "AnnouncementManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 AnnouncementManager::AnnouncementManager()
 {
 	m_IsFinish = false;

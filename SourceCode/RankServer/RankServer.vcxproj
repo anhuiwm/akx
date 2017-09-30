@@ -15,6 +15,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <Keyword>ManagedCProj</Keyword>
     <RootNamespace>RankServer</RootNamespace>
+    <ProjectName>rank_server</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -97,11 +98,11 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\CommonFile\FishConfig.h" />
+    <ClInclude Include="..\CommonFile\Config.h" />
     <ClInclude Include="..\CommonFile\FishServerConfig.h" />
     <ClInclude Include="..\CommonFile\tinyxml\tinyxml2.h" />
     <ClInclude Include="..\CommonFile\tinyxml\XmlReader.h" />
-    <ClInclude Include="FishServer.h" />
+    <ClInclude Include="MainServer.h" />
     <ClInclude Include="RankManager.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
@@ -110,11 +111,11 @@
     <ResourceCompile Include="app.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\CommonFile\FishConfig.cpp" />
+    <ClCompile Include="..\CommonFile\Config.cpp" />
     <ClCompile Include="..\CommonFile\FishServerConfig.cpp" />
     <ClCompile Include="..\CommonFile\tinyxml\tinyxml2.cpp" />
     <ClCompile Include="..\CommonFile\tinyxml\XmlReader.cpp" />
-    <ClCompile Include="FishServer.cpp" />
+    <ClCompile Include="MainServer.cpp" />
     <ClCompile Include="RankManager.cpp" />
     <ClCompile Include="RankServer.cpp" />
     <ClCompile Include="stdafx.cpp">

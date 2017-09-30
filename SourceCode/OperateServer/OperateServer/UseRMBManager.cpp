@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "UseRMBManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 #include "..\CommonFile\DBLogManager.h"
 extern void SendLogDB(NetCmd* pCmd);

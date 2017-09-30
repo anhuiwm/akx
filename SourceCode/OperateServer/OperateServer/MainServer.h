@@ -1,5 +1,5 @@
 #pragma once
-#include "..\CommonFile\FishConfig.h"
+#include "..\CommonFile\Config.h"
 #include "BuyEntityItemManager.h"
 #include "RealNameVerificationManager.h"
 #include "BindPhoneManager.h"

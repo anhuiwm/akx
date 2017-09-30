@@ -22,6 +22,7 @@
     <ProjectGuid>{F8E5E6B2-55BB-4649-AA85-2C224CC3DB8A}</ProjectGuid>
     <RootNamespace>GameServer</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>game_server</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -115,15 +116,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\CommonFile\Config.cpp" />
     <ClCompile Include="..\CommonFile\DBLogManager.cpp" />
-    <ClCompile Include="..\CommonFile\FishConfig.cpp" />
     <ClCompile Include="..\CommonFile\FishServerConfig.cpp" />
     <ClCompile Include="..\CommonFile\tinyxml\tinyxml2.cpp" />
     <ClCompile Include="..\CommonFile\tinyxml\XmlReader.cpp" />
     <ClCompile Include="AnnouncementManager.cpp" />
     <ClCompile Include="EventManager.cpp" />
     <ClCompile Include="ExChangeManager.cpp" />
-    <ClCompile Include="FishLogic\Config.cpp" />
+    <ClCompile Include="FishLogic\ExtConfig.cpp" />
     <ClCompile Include="FishLogic\FishCallback.cpp" />
     <ClCompile Include="FishLogic\FishDesk.cpp" />
     <ClCompile Include="FishLogic\FishDeskCmd.cpp" />
@@ -192,8 +193,8 @@
     <ClCompile Include="UserLogonManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\CommonFile\Config.h" />
     <ClInclude Include="..\CommonFile\DBLogManager.h" />
-    <ClInclude Include="..\CommonFile\FishConfig.h" />
     <ClInclude Include="..\CommonFile\FishServerConfig.h" />
     <ClInclude Include="..\CommonFile\ip.h" />
     <ClInclude Include="..\CommonFile\tinyxml\tinyxml2.h" />
@@ -201,7 +202,7 @@
     <ClInclude Include="AnnouncementManager.h" />
     <ClInclude Include="EventManager.h" />
     <ClInclude Include="ExChangeManager.h" />
-    <ClInclude Include="FishLogic\Config.h" />
+    <ClInclude Include="FishLogic\ExtConfig.h" />
     <ClInclude Include="FishLogic\FishCallbak.h" />
     <ClInclude Include="FishLogic\FishDesk.h" />
     <ClInclude Include="FishLogic\FishScene.h" />

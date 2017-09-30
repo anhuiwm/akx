@@ -1,14 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="源文件">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="头文件">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="资源文件">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
@@ -16,85 +8,93 @@
     <Filter Include="json">
       <UniqueIdentifier>{5ebaa12e-f63b-4b47-9f4d-42fae2c7c894}</UniqueIdentifier>
     </Filter>
+    <Filter Include="inc">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="tinyxml2.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="TCPClient.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="Common.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="Crc32.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="Random.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="SQL.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="TestSql.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="SqlUpdater.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="SqlUtinity.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="SqlTable.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="SqlIndexMap.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="SqlOperator.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="UDPClient.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="UDPServer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="TCPServerOld.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="TCPServer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="NewServer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="Encoder.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="HttpServer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="HttpClient.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="GateWay.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="Dump.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="FTPServer.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="FTPClient.cpp">
-      <Filter>源文件</Filter>
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\CommonFile\json\json_reader.cpp">
       <Filter>json</Filter>
@@ -108,127 +108,127 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SafeList.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="TCPClient.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="tinyxml2.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="Common.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="NetServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="Crc32.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="Random.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="NetClient.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="NetCmd.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SQL.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="TestSql.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SqlUpdater.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SqlUtinity.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SqlTable.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="LogHandler.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SqlIndex.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SqlIndexMap.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SqlOperator.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="NetCmd_DBServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="NetCmd_GameServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="Cmd_Fish.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SafeArray.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="UDPClient.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="UDPServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="TCPServerOld.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="TCPServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="ServerData.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="NewServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="Encoder.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="HttpServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="HttpClient.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="SafeArrayMT.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="TCPPing.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="GateWay.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="Dump.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="MyArray.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="FTPServer.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="FTPClient.h">
-      <Filter>头文件</Filter>
+      <Filter>inc</Filter>
     </ClInclude>
     <ClInclude Include="..\CommonFile\json\autolink.h">
       <Filter>json</Filter>

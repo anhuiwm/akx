@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "LogonCache.h"
-#include "FishServer.h"
+#include "MainServer.h"
 LogonCache::LogonCache()
 {
 	m_AccountMap.clear();

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "PhoneSMSManager.h"
 #include "..\CommonFile\FishServerConfig.h"
-#include "FishServer.h"
+#include "MainServer.h"
 
 const static char sSendPhoneVerificationNumberSucess[] = "{\"status\":200";
 const static BYTE bSendPhoneVerificationNUmberSucessLength = (BYTE)strlen(sSendPhoneVerificationNumberSucess);

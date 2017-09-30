@@ -1,5 +1,5 @@
 #include "Stdafx.h"
-#include "FishConfig.h"
+#include "Config.h"
 FishConfig::FishConfig()
 {
 

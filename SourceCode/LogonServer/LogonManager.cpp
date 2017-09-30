@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "LogonManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 LogonManager::LogonManager()
 {
 	m_GameIndex =1;

@@ -1,5 +1,5 @@
 #pragma once
-#include "..\CommonFile\FishConfig.h"
+#include "..\CommonFile\Config.h"
 #include "RoleManager.h"
 #include "RoleRelationManager.h"
 #include "FishMonthManager.h"

@@ -1,6 +1,6 @@
 //DB 服务器的核心类
 #pragma once
-#include "..\CommonFile\FishConfig.h"
+#include "..\CommonFile\Config.h"
 typedef HashMap<UINT, SqlTable*> TableHashMap;
 struct RcveMsg
 {

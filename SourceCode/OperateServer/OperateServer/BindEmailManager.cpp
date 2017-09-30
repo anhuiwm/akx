@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "BindEmailManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 BindEmailManager::BindEmailManager()
 {
 

@@ -2,7 +2,7 @@
 #include "Role.h"
 #include "RoleEx.h"
 //#include "ServiceUnits.h"
-#include"FishLogic\Config.h"
+#include"FishLogic\ExtConfig.h"
 #include<timeapi.h>
 #include "FishLogic\FishScene\FishResData.h"
 #include"FishServer.h"

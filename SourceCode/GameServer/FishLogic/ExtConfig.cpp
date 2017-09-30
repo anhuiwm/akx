@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "Config.h"
+#include "ExtConfig.h"
 #if !SIMPLE_SERVER_MODE
 #include "..\Role.h"
 #include "..\TableManager.h"

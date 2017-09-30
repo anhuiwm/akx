@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PhoneLogon.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 
 const static char PhoneLogonSMSInfo[] = "您的手机登陆密码为 %u 【鼎若游戏中心】";

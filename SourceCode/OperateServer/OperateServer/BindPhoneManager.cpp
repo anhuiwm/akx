@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "BindPhoneManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 
 const static char PhoneSMSInfo[] = "您的手机验证码为 %u 【鼎若游戏中心】";

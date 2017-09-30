@@ -23,6 +23,7 @@
     <RootNamespace>DBServer</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ProjectName>db_server</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -112,23 +113,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\CommonFile\FishConfig.cpp" />
+    <ClCompile Include="..\CommonFile\Config.cpp" />
     <ClCompile Include="..\CommonFile\FishServerConfig.cpp" />
     <ClCompile Include="..\CommonFile\tinyxml\tinyxml2.cpp" />
     <ClCompile Include="..\CommonFile\tinyxml\XmlReader.cpp" />
     <ClCompile Include="DBMain.cpp" />
-    <ClCompile Include="FishServer.cpp" />
+    <ClCompile Include="MainServer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\CommonFile\FishConfig.h" />
+    <ClInclude Include="..\CommonFile\Config.h" />
     <ClInclude Include="..\CommonFile\FishServerConfig.h" />
     <ClInclude Include="..\CommonFile\tinyxml\tinyxml2.h" />
     <ClInclude Include="..\CommonFile\tinyxml\XmlReader.h" />
-    <ClInclude Include="FishServer.h" />
+    <ClInclude Include="MainServer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

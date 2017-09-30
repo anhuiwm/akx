@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "IOSPayManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\DBLogManager.h"
 #include "..\CommonFile\FishServerConfig.h"
 extern void SendLogDB(NetCmd* pCmd);

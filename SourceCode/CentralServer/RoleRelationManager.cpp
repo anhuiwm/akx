@@ -1,7 +1,7 @@
 #include "Stdafx.h"
 #include "RoleRelationManager.h"
 #include "RoleManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 RoleRelationManager::RoleRelationManager()
 {
 	m_RelationMap.clear();

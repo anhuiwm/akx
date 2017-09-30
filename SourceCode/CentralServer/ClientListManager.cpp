@@ -1,6 +1,6 @@
 #include "Stdafx.h"
 #include "ClientListManager.h"
-#include "FishServer.h"
+#include "MainServer.h"
 ClientListManager::ClientListManager()
 {
 	m_PlayerList.clear();

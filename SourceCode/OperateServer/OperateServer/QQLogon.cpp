@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "QQLogon.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "..\CommonFile\FishServerConfig.h"
 QQLogon::QQLogon()
 {

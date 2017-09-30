@@ -1,6 +1,6 @@
 //登陆服务器的核心类
 #pragma once
-#include "..\CommonFile\FishConfig.h"
+#include "..\CommonFile\Config.h"
 #include "LogonManager.h"
 #include "LogonCache.h"
 struct DelClient

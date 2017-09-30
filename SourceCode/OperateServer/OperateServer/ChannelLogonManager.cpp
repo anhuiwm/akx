@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "FishServer.h"
+#include "MainServer.h"
 #include "ChannelLogonManager.h"
 #include "..\CommonFile\FishServerConfig.h"
 ChannelLogonManager::ChannelLogonManager()
