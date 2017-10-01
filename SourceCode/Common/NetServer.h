@@ -135,7 +135,7 @@ struct ServerInitData
 };
 #define CONNECT_CHECK_OK	 (0u)
 #define CONNECT_CHECK_FAILED (0xffffffffu)
-#define CONNECT_WEB_SOCKET	 (1u)
+#define CONNECT_WEB_SOCKET	 (1001u)
 class INetHandler
 {
 public:

@@ -186,15 +186,18 @@ bool NewServer::RecvDataByTCP(ClientData *pc, int nSize)
 		{
 			NetCmd *pCmdRecv = (NetCmd*)pBuff;
 			UINT cmdSize = pCmdRecv->GetCmdSize();
+			printf("recv tcp cmdSize=%d\n", cmdSize);
 			if (cmdSize == 0)
 			{
 				ASSERT(false);
 			}
 			if (cmdSize > m_InitData.BuffSize)
 			{
+#if 0  //wm todo
 				pc->RemoveCode = REMOVE_CMD_SIZE_ERROR;
 				pc->Removed = true;
 				return false;
+#endif
 			}
 			if (pc->RecvSize >= cmdSize)
 			{
@@ -204,6 +207,8 @@ bool NewServer::RecvDataByTCP(ClientData *pc, int nSize)
 					pc->RecvList.AddItem(pCmd);
 					pc->Offset += cmdSize;
 					pc->RecvSize -= cmdSize;
+
+					printf("type=%d:%d\n", pCmd->CmdType,pCmd->SubCmdType);
 				}
 				else
 				{
@@ -228,6 +233,150 @@ bool NewServer::RecvDataByTCP(ClientData *pc, int nSize)
 	}
 	return true;
 }
+
+enum WS_Status
+{
+	WS_STATUS_CONNECT = 0,
+	WS_STATUS_UNCONNECT = 1,
+};
+
+enum WS_FrameType
+{
+	WS_EMPTY_FRAME = 0xF0,
+	WS_ERROR_FRAME = 0xF1,
+	WS_TEXT_FRAME = 0x01,
+	WS_BINARY_FRAME = 0x02,
+	WS_PING_FRAME = 0x09,
+	WS_PONG_FRAME = 0x0A,
+	WS_OPENING_FRAME = 0xF3,
+	WS_CLOSING_FRAME = 0x08
+};
+
+int wsDecodeFrame(string inFrame, string &outMessage)
+{
+	int ret = WS_OPENING_FRAME;
+	const char *frameData = inFrame.c_str();
+	const int frameLength = inFrame.size();
+	if (frameLength < 2)
+	{
+		ret = WS_ERROR_FRAME;
+	}
+
+	// 检查扩展位并忽略  
+	if ((frameData[0] & 0x70) != 0x0)
+	{
+		ret = WS_ERROR_FRAME;
+	}
+
+	// fin位: 为1表示已接收完整报文, 为0表示继续监听后续报文  
+	ret = (frameData[0] & 0x80);
+	if ((frameData[0] & 0x80) != 0x80)
+	{
+		ret = WS_ERROR_FRAME;
+	}
+
+	// mask位, 为1表示数据被加密  
+	if ((frameData[1] & 0x80) != 0x80)
+	{
+		ret = WS_ERROR_FRAME;
+	}
+
+	// 操作码  
+	uint16_t payloadLength = 0;
+	uint8_t payloadFieldExtraBytes = 0;
+	uint8_t opcode = static_cast<uint8_t >(frameData[0] & 0x0f);
+	if (opcode == WS_TEXT_FRAME)
+	{
+		// 处理utf-8编码的文本帧  
+		payloadLength = static_cast<uint16_t >(frameData[1] & 0x7f);
+		if (payloadLength == 0x7e)
+		{
+			uint16_t payloadLength16b = 0;
+			payloadFieldExtraBytes = 2;
+			memcpy(&payloadLength16b, &frameData[2], payloadFieldExtraBytes);
+			payloadLength = ntohs(payloadLength16b);
+		}
+		else if (payloadLength == 0x7f)
+		{
+			// 数据过长,暂不支持  
+			ret = WS_ERROR_FRAME;
+		}
+	}
+	else if (opcode == WS_BINARY_FRAME || opcode == WS_PING_FRAME || opcode == WS_PONG_FRAME)
+	{
+		// 二进制/ping/pong帧暂不处理  
+	}
+	else if (opcode == WS_CLOSING_FRAME)
+	{
+		ret = WS_CLOSING_FRAME;
+	}
+	else
+	{
+		ret = WS_ERROR_FRAME;
+	}
+
+	// 数据解码  
+	if ((ret != WS_ERROR_FRAME) && (payloadLength > 0))
+	{
+		// header: 2字节, masking key: 4字节  
+		const char *maskingKey = &frameData[2 + payloadFieldExtraBytes];
+		char *payloadData = new char[payloadLength + 1];
+		memset(payloadData, 0, payloadLength + 1);
+		memcpy(payloadData, &frameData[2 + payloadFieldExtraBytes + 4], payloadLength);
+		for (int i = 0; i < payloadLength; i++)
+		{
+			payloadData[i] = payloadData[i] ^ maskingKey[i % 4];
+		}
+
+		outMessage = payloadData;
+		delete[] payloadData;
+	}
+
+	return ret;
+}
+
+int wsEncodeFrame(string inMessage, string &outFrame, enum WS_FrameType frameType)
+{
+	int ret = WS_EMPTY_FRAME;
+	const uint32_t messageLength = inMessage.size();
+	if (messageLength > 32767)
+	{
+		// 暂不支持这么长的数据
+		return WS_ERROR_FRAME;
+	}
+
+	uint8_t payloadFieldExtraBytes = (messageLength <= 0x7d) ? 0 : 2;
+	// header: 2字节, mask位设置为0(不加密), 则后面的masking key无须填写, 省略4字节
+	uint8_t frameHeaderSize = 2 + payloadFieldExtraBytes;
+	uint8_t *frameHeader = new uint8_t[frameHeaderSize];
+	memset(frameHeader, 0, frameHeaderSize);
+	// fin位为1, 扩展位为0, 操作位为frameType
+	frameHeader[0] = static_cast<uint8_t>(0x80 | frameType);
+
+	// 填充数据长度
+	if (messageLength <= 0x7d)
+	{
+		frameHeader[1] = static_cast<uint8_t>(messageLength);
+	}
+	else
+	{
+		frameHeader[1] = 0x7e;
+		uint16_t len = htons(messageLength);
+		memcpy(&frameHeader[2], &len, payloadFieldExtraBytes);
+	}
+
+	// 填充数据
+	uint32_t frameSize = frameHeaderSize + messageLength;
+	char *frame = new char[frameSize + 1];
+	memcpy(frame, frameHeader, frameHeaderSize);
+	memcpy(frame + frameHeaderSize, inMessage.c_str(), messageLength);
+	frame[frameSize] = '\0';
+	outFrame = frame;
+
+	delete[] frame;
+	delete[] frameHeader;
+	return ret;
+}
 void NewServer::_ThreadRecvTCP()
 {
 	int idx = ::InterlockedIncrement(&m_RecvIndex) - 1;
@@ -245,6 +394,7 @@ void NewServer::_ThreadRecvTCP()
 			ClientData *pc = pRecvData->NewClientList.GetItem();
 			pc->RecvTick = tick;
 			clientList.push_back(pc);
+			printf("\n recv add:%d\n", pc->Socket);
 		}
 
 		//2.检查状态
@@ -253,7 +403,7 @@ void NewServer::_ThreadRecvTCP()
 		for (UINT i = 0; i < clientList.size();)
 		{
 			ClientData *pc = clientList[i];
-			bool bTimeOut = false;// int(tick - pc->RecvTick) > m_InitData.Timeout;
+			bool bTimeOut = false;// wm todo int(tick - pc->RecvTick) > m_InitData.Timeout;
 			if (pc->Removed || bTimeOut)
 			{
 				RemoveClient(pc, REMOVE_TIMEOUT);
@@ -272,6 +422,7 @@ void NewServer::_ThreadRecvTCP()
 		int nRet = select(0, pSet, NULL, NULL, &time);
 		if (nRet == 0)
 			goto SLEEP;
+		printf("\n recv ret:%d\n", nRet);
 		tick = timeGetTime();
 		for (uint i = 0; i < clientList.size(); ++i)
 		{
@@ -281,6 +432,7 @@ void NewServer::_ThreadRecvTCP()
 
 			int curPos = pc->Offset + pc->RecvSize;
 			int nSize = recv(pc->Socket, (char*)pc->Buff + curPos, m_InitData.BuffSize - curPos, 0);
+			printf("\n recv socket=%d nSize:%d\n",pc->Socket, nSize);
 			if (nSize == 0 || (nSize == SOCKET_ERROR && (WSAGetLastError() == WSAECONNRESET || WSAGetLastError() == WSAECONNABORTED)))
 			{
 				if (m_InitData.BuffSize - curPos == 0)
@@ -291,7 +443,12 @@ void NewServer::_ThreadRecvTCP()
 			}
 			else
 			{
+				string in = (char*)pc->Buff;
+				string out;
+				int ret = wsDecodeFrame(in,out);
 				RecvDataByTCP(pc, nSize);
+
+
 				pc->RecvTick = tick;
 			}
 		}// end for
@@ -453,6 +610,7 @@ bool SendFirstDataToUDPClient(AcceptClientData &acd, int recvbuff, int sendbuff)
 }
 bool NewServer::CheckNewClient(AcceptClientData &data)
 {
+	printf("\n serverID:%d\n", g_ServerID);
 	char resData[512] = {0};
 	//外部进行验证
 	UINT ret = m_pHandler->CanConnected(m_InitData.ServerID, data.IP, data.Port, (void*)data.Buff, data.RecvSize, resData);
@@ -460,7 +618,7 @@ bool NewServer::CheckNewClient(AcceptClientData &data)
 	{
 		int ret = send(data.Socket, resData, strlen(resData), 0);
 		printf("\nstrlen:%d\n\nres:%d\n%s\n",strlen(resData), ret,resData);
-		if (ret != strlen((char*)data.Buff))
+		//wm  todo if (ret != strlen((char*)data.Buff))
 			return true;
 	}
 	else
@@ -479,7 +637,7 @@ bool NewServer::CheckNewClient(AcceptClientData &data)
 		else
 		{
 			int ret = send(data.Socket, (char*)&CONNECT_OK, sizeof(CONNECT_OK), 0);
-			printf("3: %d", ret);
+			printf("accept send ret: %d", ret);
 			if (ret != sizeof(CONNECT_OK))
 				return false;
 			else
@@ -537,7 +695,7 @@ void NewServer::_ThreadAccept()
 		for (uint i = 0; i < clientList.size();)
 		{
 			AcceptClientData &acd = clientList[i];
-			if (acd.Socket == NULL || tick - acd.Tick > ACCEPT_WAIT_TIMEOUT)
+			if (acd.Socket == NULL /*|| tick - acd.Tick > ACCEPT_WAIT_TIMEOUT*/) //wm todo
 			{
 				if (acd.Socket != NULL)
 					closesocket(acd.Socket);
@@ -548,6 +706,7 @@ void NewServer::_ThreadAccept()
 					GetIPString(acd.IP, acd.Port, xx);
 					Log("TCP Client recv timeout, level:%d, ip:%s", acd.WaitType, xx);
 				}
+				printf("\n accept remove:%d\n", acd.Socket);
 				continue;
 			}
 			FD_ADD(acd.Socket, pSet);
@@ -573,7 +732,7 @@ void NewServer::_ThreadAccept()
 				continue;
 			}
 			acd.Buff[ret] = 0;
-			printf("\n recv:\n%s\n",acd.Buff);
+			printf("\n accept recv:socket=%d\n%s\n", acd.Socket,acd.Buff);
 			acd.RecvSize += ret;
 			if (CheckNewClient(acd) == false)
 			{

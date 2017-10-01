@@ -961,6 +961,7 @@ bool FishServer::MainUpdate()
 		//1.处理Client 的命令
 		if (!m_ClintList.empty())
 		{
+			//printf("control client msg\n");
 			HashMap<DWORD, ServerClientData*>::iterator Iter = m_ClintList.begin();
 			for (; Iter != m_ClintList.end();)
 			{
@@ -979,6 +980,7 @@ bool FishServer::MainUpdate()
 				int Sum = 0;
 				while (Iter->second->RecvList.HasItem() && Sum < Client_Msg_OnceSum)
 				{
+					//printf("client has msg\n");
 					NetCmd* pCmd = Iter->second->RecvList.GetItem();
 					//处理网络命令 客户端发送来的登陆 注册 等命令
 					HandleClientMsg(Iter->second, pCmd);
@@ -1154,8 +1156,8 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 {
 	if (!pClient || !pCmd)
 		return;
-	if (pCmd->CmdType != Main_Logon)
-		return;
+//wm	if (pCmd->CmdType != Main_Logon)
+	//	return;
 
 	if (1)
 	{
@@ -1173,13 +1175,14 @@ void FishServer::HandleClientMsg(ServerClientData* pClient, NetCmd* pCmd)
 		Json::Value jsonRoot;
 		if (!jsonReader.parse(strJosnInfo, jsonRoot))
 		{
+			SendNewCmdToClient(pClient, pMsg);
 			return;
 		}
 
 		print_json(jsonRoot);
 		char js[512] = { 0 };
 		memcpy_s(js, 512, pMsg->data, pMsg->CmdSize - 4);
-		LogInfoToFile("Wmjson.txt", "js:%s", js);
+		LogInfoToFile("Wmjson.txt", "json send:%s", js);
 		SendNewCmdToClient(pClient, pMsg);
 		return;
 	}
